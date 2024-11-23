@@ -64,10 +64,15 @@ class JavaScriptFrontend(LanguageFrontend):
         
         try:
             tree = self.parser.parse(bytes(content, "utf8"))
+            if tree is None:
+                raise ParsingError("Parser returned None")
+            
             self.ir.clear()  # Reset IR before parsing
             self._process_tree(tree, filename)
             return self.ir
         except Exception as e:
+            if isinstance(e, NotImplementedError):
+                raise
             raise ParsingError(f"Failed to parse JavaScript/TypeScript code: {str(e)}")
 
     def get_file_extensions(self) -> List[str]:
