@@ -33,6 +33,7 @@ class IRNodeType(Enum):
     CONTROL_FLOW = auto()
     LOOP = auto()
     CALL = auto()
+    OPERATOR = auto()  # Added for operator overloading
 
 
 @dataclass
