@@ -18,14 +18,72 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
 
 ## Supported Languages
 
-- C/C++
-- Java
-- Python
-- JavaScript/TypeScript
-- Rust
-- Swift
-- Kotlin
-- And more...
+- ✅ Python (Complete)
+- 🔄 JavaScript/TypeScript (In Progress)
+- 📅 Java (Planned)
+- 📅 C/C++ (Planned)
+- 📅 Rust (Planned)
+- 📅 Swift (Planned)
+- 📅 Kotlin (Planned)
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip package manager
+- virtualenv (recommended)
+
+### Basic Installation
+
+```bash
+# Create and activate virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install from requirements
+pip install -r requirements.txt
+```
+
+### Development Installation
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Install in editable mode
+pip install -e .
+```
+
+### Language-Specific Requirements
+
+#### Python Support
+
+- No additional requirements (built-in ast module used)
+
+#### JavaScript/TypeScript Support
+
+- Requires tree-sitter and language grammars:
+
+```bash
+pip install tree-sitter tree-sitter-javascript
+```
+
+## Quick Start
+
+```python
+from lapa import Analyzer
+
+# Initialize analyzer
+analyzer = Analyzer()
+
+# Analyze Python code
+results = analyzer.analyze("path/to/code.py")
+
+# Access analysis results
+for issue in results.issues:
+    print(f"{issue.severity}: {issue.message} at {issue.location}")
+```
 
 ## Core Analysis Techniques
 
@@ -38,7 +96,6 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
 - Abstract Interpretation
 - Program Slicing
 - Dependency Analysis
-- And more...
 
 ### Dynamic Analysis
 
@@ -54,41 +111,62 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
 - Automated optimization suggestions
 - Context-aware analysis
 
-## Installation
+## Development
+
+### Running Tests
 
 ```bash
-# Coming soon
-pip install lapa
+# Run all tests
+pytest
+
+# Run with coverage report
+pytest --cov=lapa
+
+# Run specific test file
+pytest tests/test_specific.py
 ```
 
-## Quick Start
+### Code Style
 
-```python
-# Coming soon
-from lapa import Analyzer
+The project uses:
 
-# Initialize analyzer
-analyzer = Analyzer()
+- Black for code formatting
+- isort for import sorting
+- mypy for type checking
+- pylint for linting
 
-# Analyze code
-results = analyzer.analyze("path/to/code")
+```bash
+# Format code
+black .
+isort .
+
+# Type check
+mypy .
+
+# Lint
+pylint lapa tests
 ```
 
 ## Documentation
 
-Detailed documentation is under development.
+Detailed documentation is under development. To build the docs:
+
+```bash
+cd docs
+make html
+```
 
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Project Status
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current development status and [ROADMAP.md](ROADMAP.md) for planned features and milestones.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 
