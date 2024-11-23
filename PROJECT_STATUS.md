@@ -4,15 +4,15 @@
 
 ### Latest Updates
 
-- Added C++ template support
+- Added C++ operator overloading support
 - Enhanced LLVM/Clang integration
-- Improved test coverage (79% overall)
+- Improved test coverage (80% overall)
 - Expanded language feature support
 - Enhanced IR system capabilities
 
 ### Current Focus
 
-- Implementing C++ operator overloading
+- Improving LLVM/Clang integration test coverage
 - Enhancing IR system capabilities
 - Developing initial analysis features
 - Planning Rust frontend implementation
@@ -50,37 +50,42 @@
     - Non-type parameters
     - Template template parameters
     - Specializations
+  - ✅ Operator overloading (100% coverage)
+    - Unary operators
+    - Binary operators
+    - Assignment operators
+    - Function call operator
+    - Subscript operator
+    - Conversion operators
   - 🔄 LLVM/Clang parsing integration
-  - 📅 Operator overloading
-- ✅ Comprehensive test suite with high coverage (79%)
+- ✅ Comprehensive test suite with high coverage (80%)
 - ✅ Documentation framework established
 - ✅ Development roadmap created
 
 ### Upcoming Tasks
 
-1. Complete operator overloading support
-2. Improve LLVM/Clang parsing integration
-3. Begin Rust frontend planning
-4. Start implementing analysis features
+1. Improve LLVM/Clang integration test coverage
+2. Begin Rust frontend planning
+3. Start implementing analysis features
+4. Enhance IR optimization features
 
 ### Known Issues
 
 - LLVM/Clang integration module needs more test coverage
-- Need to implement operator overloading support
 - Need to improve error messages for missing LLVM/Clang
 
 ### Current Priorities
 
-1. Implement operator overloading support
-2. Improve LLVM/Clang integration test coverage
-3. Begin Rust frontend planning
-4. Start implementing analysis features
+1. Improve LLVM/Clang integration test coverage
+2. Begin Rust frontend planning
+3. Start implementing analysis features
+4. Enhance IR optimization features
 
 ## Statistics
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 79%
+- **Test Coverage**: 80%
 
   - lapa/**init**.py: 100%
   - lapa/analyzer.py: 88%
@@ -91,6 +96,7 @@
   - lapa/frontends/llvm/**init**.py: 31%
   - lapa/frontends/llvm/ast.py: 82%
   - lapa/frontends/llvm/template.py: 88%
+  - lapa/frontends/llvm/operator.py: 100%
   - lapa/frontends/grammars/**init**.py: 100%
   - lapa/ir.py: 81%
   - lapa/plugin.py: 69%
@@ -109,8 +115,14 @@
       - Non-type parameters
       - Template templates
       - Specializations
+    - ✅ Operator overloading
+      - Unary operators
+      - Binary operators
+      - Assignment operators
+      - Function call operator
+      - Subscript operator
+      - Conversion operators
     - 🔄 Parsing integration
-    - 📅 Operator overloading
 
   Phase 1 (In Progress):
 
@@ -141,8 +153,8 @@
     - ✅ LLVM integration
     - ✅ AST conversion
     - ✅ Template support
+    - ✅ Operator overloading
     - 🔄 Parsing integration
-    - 📅 Operator handling
   - 🔄 Analysis Features (In Progress)
   - 📅 LLM Integration (Planned)
 
@@ -157,7 +169,6 @@ We are in the early stages of development. If you're interested in contributing,
 ## Next Milestone
 
 - Complete C/C++ frontend implementation
-  - Implement operator overloading
   - Improve LLVM integration test coverage
   - Complete parsing integration
 - Begin Rust frontend development
