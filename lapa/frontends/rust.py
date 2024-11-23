@@ -1,5 +1,5 @@
 """
-Rust frontend implementation using tree-sitter and Cargo integration.
+Rust frontend implementation using tree-sitter and Cargo integration, with ownership system analysis.
 """
 
 from typing import Any, Union, List, Dict
@@ -12,12 +12,22 @@ from ..frontend import (
     ParsingError,
     FrontendRegistry
 )
-from ..ir import IR, Function, Struct, Enum, Trait, Macro, Implementation
+from ..ir import (
+    IR,
+    Function,
+    Struct,
+    Enum,
+    Trait,
+    Macro,
+    Implementation,
+    Variable,
+    OwnershipInfo
+)
 from .grammars import create_parser
 
 
 class RustFrontend(Frontend):
-    """Frontend for Rust code analysis using tree-sitter and Cargo integration."""
+    """Frontend for Rust code analysis with ownership system analysis."""
 
     def __init__(self):
         """Initialize Rust frontend."""
@@ -43,7 +53,9 @@ class RustFrontend(Frontend):
             LanguageFeature.ERROR_HANDLING,
             LanguageFeature.CONDITIONAL_COMPILATION,
             LanguageFeature.TYPE_INFERENCE,
-            LanguageFeature.PATTERN_MATCHING
+            LanguageFeature.PATTERN_MATCHING,
+            LanguageFeature.MUTABILITY,
+            LanguageFeature.LIFETIME_ANNOTATIONS
         }
 
         # Register supported file extensions
@@ -182,15 +194,16 @@ class RustFrontend(Frontend):
             self._process_impl(node, ir)
         elif node.type == "macro_definition":
             self._process_macro(node, ir)
+        elif node.type == "let_declaration":
+            self._process_variable_declaration(node, ir)
 
         # Process child nodes
-        for child in node.children:
+        for child in node.named_children:
             self._process_ast(child, ir)
 
     def _process_use_declaration(self, node: Any, ir: IR) -> None:
         """Process 'use' declaration."""
-        # Extract used path
-        used_path = self._get_node_text(node.child_by_field_name("name"))
+        used_path = self._get_node_text(node.child_by_field_name("argument"))
         if used_path:
             ir.imports.add(used_path)
 
@@ -205,7 +218,7 @@ class RustFrontend(Frontend):
             fields_node = node.child_by_field_name("body")
             if fields_node:
                 struct.fields = self._extract_fields(fields_node)
-            ir.structs.append(struct)
+            ir.add_struct(struct)
 
     def _process_enum(self, node: Any, ir: IR) -> None:
         """Process enum definition."""
@@ -218,24 +231,7 @@ class RustFrontend(Frontend):
             variants_node = node.child_by_field_name("body")
             if variants_node:
                 enum.variants = self._extract_variants(variants_node)
-            ir.enums.append(enum)
-
-    def _process_function(self, node: Any, ir: IR) -> None:
-        """Process function definition."""
-        # Extract function name
-        identifier = node.child_by_field_name("name")
-        if identifier:
-            function_name = self._get_node_text(identifier)
-            function = Function(name=function_name)
-            # Extract parameters
-            parameters_node = node.child_by_field_name("parameters")
-            if parameters_node:
-                function.parameters = self._extract_parameters(parameters_node)
-            # Extract return type
-            return_type_node = node.child_by_field_name("return_type")
-            if return_type_node:
-                function.return_type = self._get_node_text(return_type_node)
-            ir.functions.append(function)
+            ir.add_enum(enum)
 
     def _process_trait(self, node: Any, ir: IR) -> None:
         """Process trait definition."""
@@ -244,20 +240,11 @@ class RustFrontend(Frontend):
         if identifier:
             trait_name = self._get_node_text(identifier)
             trait = Trait(name=trait_name)
-            # Extract methods
-            trait.items = self._extract_trait_items(node)
-            ir.traits.append(trait)
-
-    def _process_impl(self, node: Any, ir: IR) -> None:
-        """Process implementation block."""
-        # Extract type being implemented
-        type_node = node.child_by_field_name("type")
-        if type_node:
-            type_name = self._get_node_text(type_node)
-            impl = Implementation(type_name=type_name)
-            # Extract methods
-            impl.methods = self._extract_impl_methods(node)
-            ir.implementations.append(impl)
+            # Extract items
+            items_node = node.child_by_field_name("body")
+            if items_node:
+                trait.items = self._extract_trait_items(items_node)
+            ir.add_trait(trait)
 
     def _process_macro(self, node: Any, ir: IR) -> None:
         """Process macro definition."""
@@ -265,21 +252,55 @@ class RustFrontend(Frontend):
         identifier = node.child_by_field_name("name")
         if identifier:
             macro_name = self._get_node_text(identifier)
-            macro = Macro(name=macro_name)
-            # Extract macro body
-            macro.body = self._get_node_text(node.child_by_field_name("body"))
-            ir.macros.append(macro)
+            macro_body = self._get_node_text(node.child_by_field_name("body"))
+            macro = Macro(name=macro_name, body=macro_body)
+            ir.add_macro(macro)
+
+    def _process_variable_declaration(self, node: Any, ir: IR) -> None:
+        """Process variable declaration with ownership information."""
+        variable_name_node = node.child_by_field_name("pattern")
+        variable_type_node = node.child_by_field_name("type")
+        variable_name = self._get_node_text(variable_name_node)
+        variable_type = self._get_node_text(variable_type_node) if variable_type_node else None
+
+        # Analyze ownership (mutability)
+        is_mutable = False
+        for child in node.children:
+            if child.type == "mutable_specifier":
+                is_mutable = True
+                break
+
+        # Create ownership information
+        ownership_info = OwnershipInfo(is_mutable=is_mutable)
+        variable = Variable(name=variable_name, var_type=variable_type, ownership=ownership_info)
+        ir.add_variable(variable)
+
+    def _process_function(self, node: Any, ir: IR) -> None:
+        """Process function definition with ownership analysis."""
+        # Extract function name
+        identifier = node.child_by_field_name("name")
+        if identifier:
+            function_name = self._get_node_text(identifier)
+            # Extract parameters
+            parameters_node = node.child_by_field_name("parameters")
+            parameters = self._extract_parameters(parameters_node) if parameters_node else []
+            # Extract return type
+            return_type_node = node.child_by_field_name("return_type")
+            return_type = self._get_node_text(return_type_node) if return_type_node else None
+            function = Function(name=function_name, return_type=return_type, parameters=parameters)
+            ir.add_function(function)
 
     def _extract_fields(self, node: Any) -> List[Dict[str, Any]]:
-        """Extract fields from a struct or enum variant."""
+        """Extract fields from a struct."""
         fields = []
         for field_node in node.named_children:
-            if field_node.type == "field_declaration":
+            if field_node.type in {"struct_field", "field_declaration"}:
                 field_name_node = field_node.child_by_field_name("name")
                 field_type_node = field_node.child_by_field_name("type")
                 field_name = self._get_node_text(field_name_node)
                 field_type = self._get_node_text(field_type_node)
-                fields.append({"name": field_name, "type": field_type})
+                if field_name and field_type:
+                    fields.append({"name": field_name, "type": field_type})
         return fields
 
     def _extract_variants(self, node: Any) -> List[Dict[str, Any]]:
@@ -289,41 +310,82 @@ class RustFrontend(Frontend):
             if variant_node.type == "enum_variant":
                 variant_name_node = variant_node.child_by_field_name("name")
                 variant_name = self._get_node_text(variant_name_node)
-                variants.append({"name": variant_name})
+                if variant_name:
+                    variants.append({"name": variant_name})
         return variants
 
     def _extract_parameters(self, node: Any) -> List[Dict[str, Any]]:
-        """Extract parameters from a function."""
+        """Extract parameters from a function with ownership info."""
         parameters = []
         for param_node in node.named_children:
             if param_node.type == "parameter":
-                param_name_node = param_node.child_by_field_name("name")
+                param_name_node = param_node.child_by_field_name("pattern")
                 param_type_node = param_node.child_by_field_name("type")
                 param_name = self._get_node_text(param_name_node)
                 param_type = self._get_node_text(param_type_node)
-                parameters.append({"name": param_name, "type": param_type})
+
+                # Analyze ownership (reference, mutability, lifetime)
+                is_reference = False
+                is_mutable = False
+                lifetime = None
+
+                if param_type_node:
+                    type_text = self._get_node_text(param_type_node)
+                    if type_text.startswith("&"):
+                        is_reference = True
+                        if type_text.startswith("&mut"):
+                            is_mutable = True
+                    # Extract lifetime if present
+                    if "<'" in type_text or "&'" in type_text:
+                        lifetime_parts = type_text.split("'")
+                        if len(lifetime_parts) > 1:
+                            lifetime = lifetime_parts[1].split()[0]
+
+                ownership_info = OwnershipInfo(
+                    is_reference=is_reference,
+                    is_mutable=is_mutable,
+                    lifetime=lifetime
+                )
+                parameters.append({
+                    "name": param_name,
+                    "type": param_type,
+                    "ownership": ownership_info
+                })
         return parameters
 
     def _extract_trait_items(self, node: Any) -> List[Any]:
         """Extract items (methods, associated types) from a trait."""
         items = []
-        items_node = node.child_by_field_name("body")
-        if items_node:
-            for item_node in items_node.named_children:
-                if item_node.type == "function_item":
-                    function = self._process_function(item_node, IR())
-                    items.append(function)
+        for item_node in node.named_children:
+            if item_node.type == "function_item":
+                function_ir = IR()
+                self._process_function(item_node, function_ir)
+                if function_ir.functions:
+                    items.append(function_ir.functions[0])
         return items
+
+    def _process_impl(self, node: Any, ir: IR) -> None:
+        """Process implementation block."""
+        # Extract type being implemented
+        type_node = node.child_by_field_name("type")
+        if type_node:
+            type_name = self._get_node_text(type_node)
+            impl = Implementation(type_name=type_name)
+            # Extract methods
+            items_node = node.child_by_field_name("body")
+            if items_node:
+                impl.methods = self._extract_impl_methods(items_node)
+            ir.add_implementation(impl)
 
     def _extract_impl_methods(self, node: Any) -> List[Any]:
         """Extract methods from an implementation block."""
         methods = []
-        items_node = node.child_by_field_name("body")
-        if items_node:
-            for item_node in items_node.named_children:
-                if item_node.type == "function_item":
-                    function = self._process_function(item_node, IR())
-                    methods.append(function)
+        for item_node in node.named_children:
+            if item_node.type == "function_item":
+                function_ir = IR()
+                self._process_function(item_node, function_ir)
+                if function_ir.functions:
+                    methods.append(function_ir.functions[0])
         return methods
 
     def _get_node_text(self, node: Any) -> str:
@@ -331,6 +393,7 @@ class RustFrontend(Frontend):
         if node is not None:
             return node.text.decode('utf-8')
         return ""
+
 
 # Register frontend
 FrontendRegistry.register("rust", RustFrontend)

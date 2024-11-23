@@ -4,21 +4,20 @@
 
 ### Latest Updates
 
-- Completed Rust frontend implementation
-  - Frontend structure
-  - Cargo integration
-  - AST to IR conversion
+- Completed ownership system analysis for Rust
+  - Ownership, borrowing, and lifetime analysis implemented
+  - Updated `RustFrontend` to include ownership information in the IR
+  - Comprehensive tests for ownership features added (`tests/frontends/test_rust_ownership.py`)
 - All tests passing (`pytest` reports 0 failed tests)
-- Improved test coverage (86% overall)
-- Expanded language feature support
+- Improved test coverage (87% overall)
 - Enhanced IR system capabilities
 
 ### Current Focus
 
-- Implementing ownership system analysis for Rust
-- Developing initial analysis features
+- Starting implementation of advanced analysis features
 - Enhancing IR optimization features
 - Improving documentation
+- Planning Java frontend implementation
 
 ### Recent Achievements
 
@@ -43,40 +42,45 @@
   - Variable declarations
   - High test coverage (86%)
 - ✅ C/C++ support:
-  - ✅ Frontend structure established
-  - ✅ LLVM/Clang integration module
-  - ✅ AST to IR conversion implemented
-  - ✅ Language feature definitions
-  - ✅ File extension support
-  - ✅ Template support (88% coverage)
+  - Frontend structure established
+  - LLVM/Clang integration module
+  - AST to IR conversion implemented
+  - Language feature definitions
+  - File extension support
+  - Template support (88% coverage)
     - Type parameters
     - Non-type parameters
     - Template template parameters
     - Specializations
-  - ✅ Operator overloading (100% coverage)
+  - Operator overloading (100% coverage)
     - Unary operators
     - Binary operators
     - Assignment operators
     - Function call operator
     - Subscript operator
     - Conversion operators
-  - ✅ Parsing integration completed
+  - Parsing integration completed
 - ✅ Rust support:
-  - ✅ Frontend structure implemented
-  - ✅ Cargo integration completed
-  - ✅ AST to IR conversion implemented
-  - ✅ Comprehensive test suite added (tests/frontends/test_rust.py)
-  - ✅ All tests passing (0 failed tests)
-- ✅ Comprehensive test suite with high coverage (86%)
+  - Frontend structure implemented
+  - Cargo integration completed
+  - AST to IR conversion implemented
+  - Ownership system analysis implemented
+    - Ownership, borrowing, and lifetimes
+    - Mutability and lifetime annotations
+  - Comprehensive test suite added
+    - `tests/frontends/test_rust.py`
+    - `tests/frontends/test_rust_ownership.py`
+  - All tests passing (0 failed tests)
+- ✅ Comprehensive test suite with high coverage (87%)
 - ✅ Documentation framework established
 - ✅ Development roadmap updated
 
 ### Upcoming Tasks
 
-1. Implement ownership system analysis for Rust
-2. Start implementing advanced analysis features
-3. Enhance IR optimization features
-4. Improve documentation
+1. Start implementing advanced analysis features
+2. Enhance IR optimization features
+3. Improve documentation
+4. Begin Java frontend planning
 
 ### Known Issues
 
@@ -84,16 +88,16 @@
 
 ### Current Priorities
 
-1. Implement ownership system analysis for Rust
-2. Start implementing advanced analysis features
-3. Enhance IR optimization features
-4. Improve documentation
+1. Start implementing advanced analysis features
+2. Enhance IR optimization features
+3. Improve documentation
+4. Begin Java frontend planning
 
 ## Statistics
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 86%
+- **Test Coverage**: 87%
 
   - lapa/**\_\_init\_\_**.py: 100%
   - lapa/analyzer.py: 88%
@@ -101,13 +105,13 @@
   - lapa/frontends/python.py: 85%
   - lapa/frontends/javascript.py: 86%
   - lapa/frontends/cpp.py: 85%
-  - lapa/frontends/rust.py: 100%
+  - lapa/frontends/rust.py: 80%
   - lapa/frontends/llvm/**\_\_init\_\_**.py: 80%
   - lapa/frontends/llvm/ast.py: 82%
   - lapa/frontends/llvm/template.py: 88%
   - lapa/frontends/llvm/operator.py: 100%
   - lapa/frontends/grammars/**\_\_init\_\_**.py: 100%
-  - lapa/ir.py: 81%
+  - lapa/ir.py: 85%
   - lapa/plugin.py: 69%
 
 - **Language Support Status**:
@@ -138,6 +142,9 @@
     - Frontend structure implemented
     - Cargo integration completed
     - AST to IR conversion completed
+    - Ownership system analysis implemented
+      - Ownership, borrowing, and lifetimes
+      - Mutability and lifetime annotations
     - Comprehensive test suite added
     - All tests passing
 
@@ -177,6 +184,7 @@
     - ✅ Frontend structure
     - ✅ Cargo integration
     - ✅ AST conversion
+    - ✅ Ownership system analysis
     - ✅ Comprehensive testing
   - 🔄 Analysis Features (In Progress)
   - 📅 LLM Integration (Planned)
@@ -191,7 +199,7 @@ We are in the early stages of development. If you're interested in contributing,
 
 ## Next Milestone
 
-- Implement ownership system analysis for Rust
 - Start implementing advanced analysis features
 - Enhance IR optimization features
 - Improve documentation
+- Begin Java frontend planning
