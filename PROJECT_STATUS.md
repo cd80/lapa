@@ -10,11 +10,12 @@
 - Implemented Python language frontend
 - Set up JavaScript/TypeScript frontend structure
 - Established comprehensive test suite
-- Achieved 85% test coverage
+- Achieved 86% test coverage
 
 ### Current Focus
 
 - Implementing JavaScript/TypeScript parsing with tree-sitter
+- Resolving tree-sitter integration challenges
 - Enhancing IR system capabilities
 - Developing initial analysis features
 
@@ -34,6 +35,7 @@
 - 🔄 JavaScript/TypeScript support:
   - Frontend structure established
   - Feature detection implemented
+  - File extension support added
   - Test suite prepared
   - Tree-sitter integration planned
 - ✅ Comprehensive test suite with high coverage
@@ -42,32 +44,33 @@
 
 ### Upcoming Tasks
 
-1. Implement tree-sitter integration for JavaScript/TypeScript
-2. Complete JavaScript/TypeScript parsing functionality
-3. Develop basic static analysis capabilities
-4. Begin work on LLM integration system
+1. Resolve tree-sitter integration for JavaScript parsing
+2. Implement JavaScript AST to IR conversion
+3. Add TypeScript-specific parsing features
+4. Begin work on analysis features
 
 ### Known Issues
 
-- None at this time (core architecture and Python frontend complete)
+- Tree-sitter integration challenges for JavaScript parsing
+- Need to resolve parser initialization approach
 
 ### Current Priorities
 
-1. Set up tree-sitter build system for JavaScript grammar
-2. Implement JavaScript AST to IR conversion
-3. Add TypeScript-specific parsing features
-4. Begin basic analysis algorithms implementation
+1. Research alternative approaches for tree-sitter integration
+2. Implement basic JavaScript parsing functionality
+3. Set up TypeScript-specific features
+4. Begin analysis algorithms implementation
 
 ## Statistics
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 85%
+- **Test Coverage**: 86%
   - lapa/**init**.py: 100%
   - lapa/analyzer.py: 88%
   - lapa/frontend.py: 94%
   - lapa/frontends/python.py: 89%
-  - lapa/frontends/javascript.py: 71%
+  - lapa/frontends/javascript.py: 82%
   - lapa/ir.py: 99%
   - lapa/plugin.py: 69%
 - **Supported Languages**:
@@ -95,6 +98,6 @@ We are in the early stages of development. If you're interested in contributing,
 
 ## Next Milestone
 
-- Complete JavaScript/TypeScript frontend implementation
-- Integrate tree-sitter for robust parsing
+- Complete JavaScript/TypeScript parsing implementation
+- Resolve tree-sitter integration challenges
 - Begin development of basic analysis capabilities
