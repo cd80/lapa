@@ -1,169 +1,141 @@
 """
-Tests for the LAPA frontend module.
+Tests for frontend interface and registry.
 """
 
-import pytest
 from pathlib import Path
-from typing import List
+import pytest
+from unittest.mock import MagicMock
 
 from lapa.frontend import (
-    LanguageFeatures,
-    LanguageFrontend,
+    Frontend,
+    LanguageFeature,
     FrontendRegistry,
     ParsingError
 )
 from lapa.ir import IR
 
 
-class MockLanguageFrontend(LanguageFrontend):
-    """Mock frontend implementation for testing."""
+class MockFrontend(Frontend):
+    """Mock frontend for testing."""
     
-    def _get_language_features(self) -> LanguageFeatures:
-        features = LanguageFeatures()
-        features.has_classes = True
-        features.has_interfaces = False
-        features.typing_system = "dynamic"
-        return features
-
-    def parse_file(self, path: Path) -> IR:
+    def __init__(self):
+        """Initialize mock frontend."""
+        super().__init__()
+        self.features = {
+            LanguageFeature.FUNCTIONS,
+            LanguageFeature.CLASSES
+        }
+        self.file_extensions = {".mock"}
+    
+    def parse_file(self, path: Path, ir: IR) -> None:
+        """Mock file parsing."""
         if not Path(path).exists():
             raise FileNotFoundError(f"File not found: {path}")
-        return self.ir
-
-    def parse_string(self, content: str, filename: str = "<string>") -> IR:
-        if not content:
-            raise ParsingError("Empty content")
-        return self.ir
-
-    def get_file_extensions(self) -> List[str]:
-        return [".mock", ".test"]
+        if str(path).endswith(".error"):
+            raise ParsingError("Mock parsing error")
+    
+    def parse_string(self, source: str, ir: IR) -> None:
+        """Mock string parsing."""
+        if "error" in source:
+            raise ParsingError("Mock parsing error")
 
 
 def test_language_features():
-    """Test LanguageFeatures initialization and properties."""
-    features = LanguageFeatures()
-    
-    # Test default values
-    assert features.has_classes is False
-    assert features.has_interfaces is False
-    assert features.has_generics is False
-    assert features.has_exceptions is False
-    assert features.has_async is False
-    assert features.typing_system == "dynamic"
-    assert features.memory_management == "gc"
+    """Test language feature enumeration."""
+    assert LanguageFeature.FUNCTIONS is not None
+    assert LanguageFeature.CLASSES is not None
+    assert LanguageFeature.INHERITANCE is not None
 
 
 def test_mock_frontend_initialization():
-    """Test frontend initialization."""
-    frontend = MockLanguageFrontend()
-    assert frontend is not None
-    assert frontend.ir is not None
-    
-    features = frontend.features
-    assert features.has_classes is True
-    assert features.has_interfaces is False
-    assert features.typing_system == "dynamic"
+    """Test mock frontend initialization."""
+    frontend = MockFrontend()
+    assert frontend.features == {
+        LanguageFeature.FUNCTIONS,
+        LanguageFeature.CLASSES
+    }
+    assert frontend.file_extensions == {".mock"}
 
 
 def test_frontend_feature_support():
-    """Test feature support checking."""
-    frontend = MockLanguageFrontend()
-    
-    assert frontend.supports_feature("has_classes") is True
-    assert frontend.supports_feature("has_interfaces") is False
-    assert frontend.supports_feature("nonexistent_feature") is False
+    """Test frontend feature support checking."""
+    frontend = MockFrontend()
+    assert frontend.supports_feature(LanguageFeature.FUNCTIONS)
+    assert frontend.supports_feature(LanguageFeature.CLASSES)
+    assert not frontend.supports_feature(LanguageFeature.TEMPLATES)
 
 
 def test_frontend_registry():
-    """Test frontend registry operations."""
-    registry = FrontendRegistry()
-    
-    # Register frontend
-    registry.register_frontend("mock", MockLanguageFrontend)
-    
-    # Test language lookup
-    frontend_class = registry.get_frontend("mock")
-    assert frontend_class is not None
-    assert frontend_class == MockLanguageFrontend
-    
-    # Test extension lookup
-    frontend_class = registry.get_frontend_for_file("test.mock")
-    assert frontend_class is not None
-    assert frontend_class == MockLanguageFrontend
-    
-    # Test unknown extension
-    frontend_class = registry.get_frontend_for_file("test.unknown")
-    assert frontend_class is None
+    """Test frontend registry."""
+    FrontendRegistry.register("mock", MockFrontend)
+    assert FrontendRegistry.get_frontend("mock") == MockFrontend
+    assert "mock" in FrontendRegistry.supported_languages()
+    assert ".mock" in FrontendRegistry.supported_extensions()
 
 
 def test_frontend_registry_invalid_registration():
-    """Test registering invalid frontend."""
-    registry = FrontendRegistry()
-    
+    """Test invalid frontend registration."""
+    FrontendRegistry.register("test", MockFrontend)
     with pytest.raises(ValueError):
-        registry.register_frontend("invalid", str)
+        FrontendRegistry.register("test", MockFrontend)
 
 
 def test_frontend_supported_languages():
     """Test getting supported languages."""
-    registry = FrontendRegistry()
-    registry.register_frontend("mock", MockLanguageFrontend)
-    
-    languages = registry.get_supported_languages()
-    assert "mock" in languages
-    assert len(languages) == 1
+    FrontendRegistry.register("lang1", MockFrontend)
+    FrontendRegistry.register("lang2", MockFrontend)
+    languages = FrontendRegistry.supported_languages()
+    assert "lang1" in languages
+    assert "lang2" in languages
 
 
 def test_frontend_supported_extensions():
     """Test getting supported extensions."""
-    registry = FrontendRegistry()
-    registry.register_frontend("mock", MockLanguageFrontend)
-    
-    extensions = registry.get_supported_extensions()
+    FrontendRegistry.register("ext1", MockFrontend)
+    FrontendRegistry.register("ext2", MockFrontend)
+    extensions = FrontendRegistry.supported_extensions()
     assert ".mock" in extensions
-    assert ".test" in extensions
-    assert len(extensions) == 2
 
 
 def test_parsing_error():
     """Test parsing error handling."""
-    frontend = MockLanguageFrontend()
-    
+    frontend = MockFrontend()
+    ir = MagicMock()
     with pytest.raises(ParsingError):
-        frontend.parse_string("")
+        frontend.parse_string("error", ir)
 
 
 def test_file_not_found():
-    """Test file not found handling."""
-    frontend = MockLanguageFrontend()
-    
+    """Test file not found error."""
+    frontend = MockFrontend()
+    ir = MagicMock()
     with pytest.raises(FileNotFoundError):
-        frontend.parse_file("nonexistent.mock")
+        frontend.parse_file("nonexistent.mock", ir)
 
 
 def test_multiple_frontends():
-    """Test registry with multiple frontends."""
-    class AnotherMockFrontend(MockLanguageFrontend):
-        def get_file_extensions(self) -> List[str]:
-            return [".another"]
+    """Test multiple frontend registration."""
+    class Frontend1(MockFrontend):
+        def __init__(self):
+            super().__init__()
+            self.file_extensions = {".f1"}
     
-    registry = FrontendRegistry()
-    registry.register_frontend("mock1", MockLanguageFrontend)
-    registry.register_frontend("mock2", AnotherMockFrontend)
+    class Frontend2(MockFrontend):
+        def __init__(self):
+            super().__init__()
+            self.file_extensions = {".f2"}
     
-    assert len(registry.get_supported_languages()) == 2
-    assert len(registry.get_supported_extensions()) == 3
+    FrontendRegistry.register("f1", Frontend1)
+    FrontendRegistry.register("f2", Frontend2)
     
-    # Test extension mappings
-    assert registry.get_frontend_for_file("test.mock") == MockLanguageFrontend
-    assert registry.get_frontend_for_file("test.another") == AnotherMockFrontend
+    extensions = FrontendRegistry.supported_extensions()
+    assert ".f1" in extensions
+    assert ".f2" in extensions
 
 
 def test_case_insensitive_extensions():
-    """Test case-insensitive extension handling."""
-    registry = FrontendRegistry()
-    registry.register_frontend("mock", MockLanguageFrontend)
-    
-    # Both should work regardless of case
-    assert registry.get_frontend_for_file("test.MOCK") == MockLanguageFrontend
-    assert registry.get_frontend_for_file("test.mock") == MockLanguageFrontend
+    """Test case-insensitive extension checking."""
+    frontend = MockFrontend()
+    assert frontend.supports_extension(".MOCK")
+    assert frontend.supports_extension(".mock")
+    assert frontend.supports_extension(".MoCk")

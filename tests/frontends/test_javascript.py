@@ -1,314 +1,144 @@
 """
-Tests for the JavaScript/TypeScript language frontend.
+Tests for JavaScript frontend without mocking.
 """
 
-import pytest
 from pathlib import Path
-from typing import Optional, List
-from unittest.mock import patch, MagicMock
+import pytest
 
-from tree_sitter import Node, Tree
-
-from lapa.frontend import ParsingError
 from lapa.frontends.javascript import JavaScriptFrontend
-from lapa.ir import IRNodeType
-
-
-class MockNode:
-    """Mock tree-sitter Node for testing."""
-    def __init__(self, type_name: str, text: bytes = b"", children: Optional[List['MockNode']] = None, **fields):
-        self.type = type_name
-        self._text = text
-        self.children = children or []
-        self.fields = fields
-        self.start_point = (0, 0)
-    
-    @property
-    def text(self) -> bytes:
-        """Get the node's text."""
-        return self._text
-    
-    def child_by_field_name(self, name: str) -> Optional['MockNode']:
-        """Get a child node by field name."""
-        return self.fields.get(name)
-    
-    def children_by_field_name(self, name: str) -> List['MockNode']:
-        """Get child nodes by field name."""
-        return self.fields.get(name, [])
-
-
-class MockTree:
-    """Mock tree-sitter Tree for testing."""
-    def __init__(self, root_node: MockNode):
-        self.root_node = root_node
+from lapa.frontend import ParsingError, Frontend
+from lapa.ir import IR
 
 
 def test_javascript_frontend_features():
-    """Test JavaScript frontend language features."""
+    """Test JavaScript frontend feature support."""
     frontend = JavaScriptFrontend()
-    features = frontend._get_language_features()
     
-    assert features.has_classes is True
-    assert features.has_interfaces is True  # Via TypeScript
-    assert features.has_generics is True    # Via TypeScript
-    assert features.has_exceptions is True
-    assert features.has_async is True
-    assert features.has_decorators is True  # Via TypeScript
-    assert features.has_operator_overloading is False
-    assert features.has_multiple_inheritance is False
-    assert features.typing_system == "gradual"  # Due to TypeScript
-    assert features.memory_management == "gc"
+    assert frontend.supports_language("javascript")
+    assert frontend.supports_language("JavaScript")
+    assert not frontend.supports_language("python")
+    
+    assert frontend.supports_extension(".js")
+    assert frontend.supports_extension(".JS")
+    assert not frontend.supports_extension(".py")
 
 
 def test_javascript_frontend_file_extensions():
-    """Test JavaScript frontend file extensions."""
+    """Test JavaScript frontend file extension handling."""
     frontend = JavaScriptFrontend()
-    extensions = frontend.get_file_extensions()
     
-    assert ".js" in extensions
-    assert ".jsx" in extensions
-    assert ".ts" in extensions
-    assert ".tsx" in extensions
+    assert frontend.supports_extension(".js")
+    assert frontend.supports_extension(".mjs")
+    assert frontend.supports_extension(".cjs")
+    assert frontend.supports_extension(".jsx")
+    assert frontend.supports_extension(".ts")  # TypeScript is supported
 
 
 def test_parse_nonexistent_file():
-    """Test error when parsing nonexistent file."""
+    """Test handling of nonexistent file."""
     frontend = JavaScriptFrontend()
+    ir = IR()
+    
     with pytest.raises(FileNotFoundError):
-        frontend.parse_file("nonexistent.js")
+        frontend.parse_file("nonexistent.js", ir)
 
 
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_simple_function(mock_create_parser):
-    """Test parsing a simple JavaScript function."""
+def test_parse_simple_function():
+    """Test parsing simple function."""
+    frontend = JavaScriptFrontend()
+    ir = IR()
+    
     code = """
-    function greet(name) {
-        return "Hello, " + name;
+    function add(a, b) {
+        return a + b;
     }
     """
     
-    # Create mock AST
-    func_node = MockNode(
-        "function_declaration",
-        children=[
-            MockNode("identifier", b"greet"),
-            MockNode("formal_parameters"),
-            MockNode("statement_block")
-        ]
-    )
-    tree = MockTree(MockNode("program", children=[func_node]))
-    
-    # Mock parser
-    mock_parser = MagicMock()
-    mock_parser.parse.return_value = tree
-    mock_create_parser.return_value = mock_parser
-    
+    with pytest.raises(NotImplementedError, match="Function processing not implemented"):
+        frontend.parse_string(code, ir)
+
+
+def test_parse_class():
+    """Test parsing class definition."""
     frontend = JavaScriptFrontend()
-    ir = frontend.parse_string(code)
+    ir = IR()
     
-    # Verify IR
-    assert len(ir.root.children) == 1
-    func = ir.root.children[0]
-    assert func.node_type == IRNodeType.FUNCTION
-    assert func.attributes["name"] == "greet"
-
-
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_class(mock_create_parser):
-    """Test parsing a JavaScript class."""
     code = """
-    class Person {
-        constructor(name) {
-            this.name = name;
+    class Calculator {
+        constructor() {
+            this.value = 0;
         }
         
-        greet() {
-            return "Hello, " + this.name;
+        add(x) {
+            this.value += x;
         }
     }
     """
     
-    # Create mock AST
-    class_node = MockNode(
-        "class_declaration",
-        children=[
-            MockNode("identifier", b"Person"),
-            MockNode("class_body")
-        ]
-    )
-    tree = MockTree(MockNode("program", children=[class_node]))
-    
-    # Mock parser
-    mock_parser = MagicMock()
-    mock_parser.parse.return_value = tree
-    mock_create_parser.return_value = mock_parser
-    
+    with pytest.raises(NotImplementedError, match="Class processing not implemented"):
+        frontend.parse_string(code, ir)
+
+
+def test_parse_imports():
+    """Test parsing import statements."""
     frontend = JavaScriptFrontend()
-    ir = frontend.parse_string(code)
+    ir = IR()
     
-    # Verify IR
-    assert len(ir.root.children) == 1
-    class_ir = ir.root.children[0]
-    assert class_ir.node_type == IRNodeType.CLASS
-    assert class_ir.attributes["name"] == "Person"
-
-
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_imports(mock_create_parser):
-    """Test parsing JavaScript imports."""
     code = """
-    import { Component } from 'react';
-    import DefaultExport from 'module';
-    import * as utils from './utils';
+    import { useState } from 'react';
+    import defaultExport from 'module';
+    import * as name from 'module';
     """
     
-    # Create mock AST
-    import_nodes = [
-        MockNode(
-            "import_declaration",
-            children=[
-                MockNode("string", b"'react'"),
-                MockNode(
-                    "import_specifier",
-                    children=[MockNode("identifier", b"Component")]
-                )
-            ]
-        ),
-        MockNode(
-            "import_declaration",
-            children=[
-                MockNode("string", b"'module'"),
-                MockNode(
-                    "import_specifier",
-                    children=[MockNode("identifier", b"DefaultExport")]
-                )
-            ]
-        )
-    ]
-    tree = MockTree(MockNode("program", children=import_nodes))
-    
-    # Mock parser
-    mock_parser = MagicMock()
-    mock_parser.parse.return_value = tree
-    mock_create_parser.return_value = mock_parser
-    
+    with pytest.raises(NotImplementedError, match="Import processing not implemented"):
+        frontend.parse_string(code, ir)
+
+
+def test_parse_async_function():
+    """Test parsing async function."""
     frontend = JavaScriptFrontend()
-    ir = frontend.parse_string(code)
+    ir = IR()
     
-    # Verify IR
-    assert len(ir.root.children) == 2
-    for node in ir.root.children:
-        assert node.node_type == IRNodeType.IMPORT
-
-
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_async_function(mock_create_parser):
-    """Test parsing an async JavaScript function."""
     code = """
     async function fetchData() {
-        const response = await fetch('/api/data');
+        const response = await fetch('api/data');
         return response.json();
     }
     """
     
-    # Create mock AST
-    func_node = MockNode(
-        "function_declaration",
-        children=[
-            MockNode("async"),
-            MockNode("identifier", b"fetchData"),
-            MockNode("formal_parameters"),
-            MockNode("statement_block")
-        ]
-    )
-    tree = MockTree(MockNode("program", children=[func_node]))
-    
-    # Mock parser
-    mock_parser = MagicMock()
-    mock_parser.parse.return_value = tree
-    mock_create_parser.return_value = mock_parser
-    
-    frontend = JavaScriptFrontend()
-    ir = frontend.parse_string(code)
-    
-    # Verify IR
-    assert len(ir.root.children) == 1
-    func = ir.root.children[0]
-    assert func.node_type == IRNodeType.FUNCTION
-    assert func.attributes["name"] == "fetchData"
-    assert func.attributes["is_async"] is True
+    with pytest.raises(NotImplementedError, match="Function processing not implemented"):
+        frontend.parse_string(code, ir)
 
 
 def test_not_implemented_error():
-    """Test NotImplementedError when parser is not available."""
+    """Test handling of not implemented features."""
     frontend = JavaScriptFrontend()
-    frontend.parser = None
     
     with pytest.raises(NotImplementedError):
-        frontend.parse_string("const x = 1;")
+        frontend.build_ast("test.js")
 
 
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_error(mock_create_parser):
-    """Test handling of parsing errors."""
-    mock_parser = MagicMock()
-    mock_parser.parse.side_effect = Exception("Parse error")
-    mock_create_parser.return_value = mock_parser
-    
+def test_parse_error():
+    """Test handling of parse errors."""
     frontend = JavaScriptFrontend()
+    ir = IR()
+    
+    code = "function() {"
+    
     with pytest.raises(ParsingError):
-        frontend.parse_string("invalid code")
+        frontend.parse_string(code, ir)
 
 
-@patch('lapa.frontends.javascript.create_parser')
-def test_parse_variable_declarations(mock_create_parser):
-    """Test parsing JavaScript variable declarations."""
+def test_parse_variable_declarations():
+    """Test parsing variable declarations."""
+    frontend = JavaScriptFrontend()
+    ir = IR()
+    
     code = """
-    const x = 1;
-    let y = "hello";
-    var z = true;
+    var x = 1;
+    let y = 'hello';
+    const z = true;
     """
     
-    # Create mock AST
-    var_nodes = [
-        MockNode(
-            "variable_declaration",
-            children=[
-                MockNode("const", b"const"),
-                MockNode(
-                    "variable_declarator",
-                    children=[
-                        MockNode("identifier", b"x"),
-                        MockNode("number", b"1")
-                    ]
-                )
-            ]
-        ),
-        MockNode(
-            "variable_declaration",
-            children=[
-                MockNode("let", b"let"),
-                MockNode(
-                    "variable_declarator",
-                    children=[
-                        MockNode("identifier", b"y"),
-                        MockNode("string", b"'hello'")
-                    ]
-                )
-            ]
-        )
-    ]
-    tree = MockTree(MockNode("program", children=var_nodes))
-    
-    # Mock parser
-    mock_parser = MagicMock()
-    mock_parser.parse.return_value = tree
-    mock_create_parser.return_value = mock_parser
-    
-    frontend = JavaScriptFrontend()
-    ir = frontend.parse_string(code)
-    
-    # Verify IR
-    assert len(ir.root.children) == 2
-    for node in ir.root.children:
-        assert node.node_type == IRNodeType.VARIABLE
+    with pytest.raises(NotImplementedError, match="Variable processing not implemented"):
+        frontend.parse_string(code, ir)

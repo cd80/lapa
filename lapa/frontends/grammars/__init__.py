@@ -1,72 +1,81 @@
 """
-Tree-sitter grammar management for LAPA frontends.
-
-This module handles the loading and management of tree-sitter grammars
-for different programming languages.
+Tree-sitter grammar handling using pip-installed packages.
 """
 
-from pathlib import Path
-from typing import Dict, Optional
-from tree_sitter import Language, Parser
+from typing import Dict
+from tree_sitter import Parser, Language
+
+# Import the pip-installed tree-sitter language packages
+import tree_sitter_python
+import tree_sitter_c
+import tree_sitter_cpp
+import tree_sitter_rust
+import tree_sitter_java
+import tree_sitter_javascript
+import tree_sitter_typescript
+
+# Map language names to their modules
+_language_modules = {
+    'python': tree_sitter_python,
+    'c': tree_sitter_c,
+    'cpp': tree_sitter_cpp,
+    'rust': tree_sitter_rust,
+    'java': tree_sitter_java,
+    'javascript': tree_sitter_javascript,
+    'typescript': tree_sitter_typescript,
+}
 
 # Cache for loaded languages
 _language_cache: Dict[str, Language] = {}
 
-def get_grammar_path(language: str) -> Path:
-    """Get the path to a language's grammar library."""
-    lib_name = f"tree-sitter-{language}.so"
-    if Path(f"lib/{lib_name}").exists():
-        return Path(f"lib/{lib_name}")
-    elif Path(f"build/tree-sitter-{language}/src/parser.so").exists():
-        return Path(f"build/tree-sitter-{language}/src/parser.so")
-    else:
-        raise FileNotFoundError(f"Grammar not found for {language}")
 
 def get_language(name: str) -> Language:
     """
-    Get a tree-sitter Language instance for a specific language.
-    
+    Get tree-sitter language.
+
     Args:
-        name: Language name (e.g., 'javascript', 'python')
-    
+        name: Language name
+
     Returns:
-        tree_sitter.Language instance
-    
+        Tree-sitter Language object
+
     Raises:
-        RuntimeError: If grammar loading fails
+        RuntimeError: If language loading fails
     """
     if name in _language_cache:
         return _language_cache[name]
-    
-    grammar_path = get_grammar_path(name)
+
     try:
-        language = Language(str(grammar_path), name)
+        module = _language_modules.get(name)
+        if module is None:
+            raise ValueError(f"No module found for language '{name}'")
+
+        # Create the Language object using module.language()
+        language = Language(module.language())
         _language_cache[name] = language
         return language
     except Exception as e:
-        raise RuntimeError(f"Failed to load {name} grammar: {e}")
+        raise RuntimeError(f"Failed to load language {name}: {str(e)}") from e
 
-def create_parser(language: str) -> Parser:
+
+def create_parser(language_name: str) -> Parser:
     """
-    Create a tree-sitter Parser for a specific language.
-    
+    Create tree-sitter parser.
+
     Args:
-        language: Language name (e.g., 'javascript', 'python')
-    
+        language_name: Language name
+
     Returns:
-        tree_sitter.Parser instance configured for the language
-    
+        Tree-sitter Parser
+
     Raises:
         RuntimeError: If parser creation fails
     """
     try:
-        parser = Parser()
-        # Ensure the parser has the set_language method
-        if not hasattr(parser, 'set_language'):
-            raise AttributeError("Parser does not support set_language")
-        
-        lang = get_language(language)
-        parser.set_language(lang)
+        language_obj = get_language(language_name)
+
+        parser = Parser(language_obj)
+        parser.language = get_language(language_name)
         return parser
     except Exception as e:
-        raise RuntimeError(f"Failed to create parser for {language}: {e}")
+        raise RuntimeError(f"Failed to create parser for {language_name}: {str(e)}") from e

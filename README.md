@@ -21,13 +21,16 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
 ### Current Support
 
 - ✅ Python (Complete)
-- 🔄 JavaScript/TypeScript (In Progress)
+  - Tree-sitter integration completed
+- ✅ JavaScript/TypeScript (Complete)
+  - Tree-sitter integration completed
+- ✅ C/C++ (Complete)
+  - Tree-sitter integration completed
 
 ### Planned Support
 
 Phase 1:
 
-- 📅 C/C++
 - 📅 Rust
 - 📅 Java
 

@@ -1,193 +1,234 @@
 """
-LLVM/Clang integration for LAPA framework.
+LLVM/Clang integration module.
 
-This module provides integration with LLVM and Clang for parsing and analyzing
-C and C++ code. It handles the low-level interaction with the LLVM infrastructure
-and provides a high-level interface for the C/C++ frontend.
+This module provides integration with LLVM/Clang for parsing C/C++ code.
 """
 
+from typing import Any, Dict, List, Optional, Union
+from pathlib import Path
 import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
-
-# Flag to track if LLVM/Clang is available
-LLVM_AVAILABLE = False
+import platform
 
 try:
     import clang.cindex as clang
+
+    # Attempt to set the library path for libclang if not already loaded
+    if not clang.Config.loaded:
+        system = platform.system()
+        if system == "Darwin":
+            # macOS
+            possible_paths = [
+                "/usr/local/opt/llvm/lib",     # Common Homebrew path on Intel Macs
+                "/opt/homebrew/opt/llvm/lib",  # Common Homebrew path on Apple Silicon Macs
+                "/usr/local/lib",              # Alternate paths
+                "/usr/lib",
+            ]
+            for path in possible_paths:
+                libclang_path = Path(path) / "libclang.dylib"
+                if libclang_path.exists():
+                    clang.Config.set_library_file(str(libclang_path))
+                    break
+        elif system == "Linux":
+            # Linux
+            possible_paths = [
+                "/usr/lib/llvm/lib",
+                "/usr/lib",
+                "/usr/local/lib",
+            ]
+            for path in possible_paths:
+                libclang_path = Path(path) / "libclang.so"
+                if libclang_path.exists():
+                    clang.Config.set_library_file(str(libclang_path))
+                    break
+        elif system == "Windows":
+            # Windows
+            possible_paths = [
+                "C:\\Program Files\\LLVM\\bin",
+                "C:\\LLVM\\bin",
+            ]
+            for path in possible_paths:
+                libclang_path = Path(path) / "libclang.dll"
+                if libclang_path.exists():
+                    clang.Config.set_library_file(str(libclang_path))
+                    break
+
+    if not clang.Config.loaded:
+        raise ImportError("Could not load libclang. Please ensure libclang is installed and accessible.")
+
+    HAVE_LIBCLANG = True
     LLVM_AVAILABLE = True
 except ImportError:
-    clang = None
+    HAVE_LIBCLANG = False
+    LLVM_AVAILABLE = False
 
 
-class LLVMError(Exception):
-    """Base class for LLVM-related errors."""
+class LLVMNotFoundError(Exception):
+    """Raised when LLVM/Clang is not available."""
     pass
 
 
-class LLVMNotFoundError(LLVMError):
-    """Error raised when LLVM/Clang is not available."""
-    
-    def __init__(self):
-        super().__init__(
-            "python-clang bindings not found. Please install libclang and python-clang-dev:\n"
-            "  Ubuntu/Debian: apt-get install libclang-dev python3-clang\n"
-            "  macOS: brew install llvm && pip install clang\n"
-            "  Windows: pip install clang"
-        )
+def cursor_kind_name(kind: Any) -> str:
+    """
+    Get string name of cursor kind.
+
+    Args:
+        kind: Cursor kind from libclang
+
+    Returns:
+        String name of the cursor kind
+    """
+    return kind.name.lower()
+
+
+def type_kind_name(kind: Any) -> str:
+    """
+    Get string name of type kind.
+
+    Args:
+        kind: Type kind from libclang
+
+    Returns:
+        String name of the type kind
+    """
+    return kind.name.lower()
+
+
+def access_specifier_name(access: Any) -> str:
+    """
+    Get string name of access specifier.
+
+    Args:
+        access: Access specifier from libclang
+
+    Returns:
+        String name of the access specifier
+    """
+    return access.name.lower()
 
 
 class LLVMContext:
     """Context manager for LLVM/Clang operations."""
-    
-    def __init__(self):
-        """Initialize LLVM context."""
+
+    def __init__(
+        self,
+        include_paths: Optional[List[str]] = None,
+        definitions: Optional[Dict[str, str]] = None
+    ):
+        """
+        Initialize LLVM context.
+
+        Args:
+            include_paths: Additional include paths
+            definitions: Preprocessor definitions
+
+        Raises:
+            LLVMNotFoundError: If LLVM/Clang is not available
+        """
         if not LLVM_AVAILABLE:
-            raise LLVMNotFoundError()
-        
-        self.index = None
-        self._find_libclang()
-    
-    def _find_libclang(self) -> None:
-        """Find and load libclang library."""
-        if not LLVM_AVAILABLE:
-            raise LLVMNotFoundError()
-        
-        # Common library paths
-        paths = [
-            # macOS Homebrew
-            "/usr/local/opt/llvm/lib/libclang.dylib",
-            "/opt/homebrew/opt/llvm/lib/libclang.dylib",
-            # Linux
-            "/usr/lib/llvm-*/lib/libclang.so",
-            "/usr/lib/libclang.so",
-            # Windows
-            "C:/Program Files/LLVM/bin/libclang.dll",
-        ]
-        
-        # Try each path
-        for path in paths:
-            if "*" in path:
-                # Handle wildcard paths (e.g., llvm-*)
-                import glob
-                candidates = glob.glob(path)
-                for candidate in sorted(candidates, reverse=True):
-                    if os.path.exists(candidate):
-                        try:
-                            clang.Config.set_library_file(candidate)
-                            return
-                        except:
-                            continue
-            elif os.path.exists(path):
-                try:
-                    clang.Config.set_library_file(path)
-                    return
-                except:
-                    continue
-        
-        # If no path works, try default loading
-        try:
-            clang.conf.get_cindex_library()
-        except:
-            raise RuntimeError(
-                "Could not find libclang. Please ensure LLVM and Clang are installed."
+            raise LLVMNotFoundError(
+                "LLVM/Clang not available. Please ensure libclang is installed and accessible."
             )
-    
-    def __enter__(self) -> 'LLVMContext':
-        """Enter the context."""
-        if not LLVM_AVAILABLE:
-            raise LLVMNotFoundError()
-        
+
         self.index = clang.Index.create()
+        self.include_paths = include_paths or []
+        self.definitions = definitions or {}
+
+    def __enter__(self):
+        """Enter context."""
         return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Exit the context."""
-        self.index = None
-    
-    def parse_file(self, path: Union[str, Path], args: Optional[List[str]] = None) -> Any:
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context."""
+        # Clean up if needed
+        pass
+
+    def _get_compiler_args(self, args: Optional[List[str]] = None) -> List[str]:
         """
-        Parse a C/C++ file using Clang.
-        
+        Get compiler arguments.
+
         Args:
-            path: Path to the file to parse
             args: Additional compiler arguments
-        
+
         Returns:
-            clang.TranslationUnit: The parsed translation unit
-        
-        Raises:
-            RuntimeError: If parsing fails
-            LLVMNotFoundError: If LLVM/Clang is not available
+            List of compiler arguments
         """
-        if not LLVM_AVAILABLE:
-            raise LLVMNotFoundError()
-        
-        if self.index is None:
-            raise RuntimeError("LLVM context not initialized")
-        
-        path = str(path)
-        args = args or []
-        
-        try:
-            return self.index.parse(path, args)
-        except Exception as e:
-            raise RuntimeError(f"Failed to parse {path}: {str(e)}")
-    
-    def parse_string(self, content: str, filename: str = "input.cpp", args: Optional[List[str]] = None) -> Any:
+        compiler_args = []
+
+        # Add include paths
+        for path in self.include_paths:
+            compiler_args.append(f"-I{path}")
+
+        # Add preprocessor definitions
+        for name, value in self.definitions.items():
+            compiler_args.append(f"-D{name}={value}")
+
+        # Add additional arguments
+        if args:
+            compiler_args.extend(args)
+
+        return compiler_args
+
+    def parse_string(
+        self,
+        source: str,
+        filename: str = "<string>",
+        args: Optional[List[str]] = None
+    ) -> Any:
         """
-        Parse C/C++ code from a string using Clang.
-        
+        Parse source code string.
+
         Args:
-            content: The code to parse
-            filename: Name to use for the temporary file
+            source: Source code to parse
+            filename: Name to use for the source file
             args: Additional compiler arguments
-        
+
         Returns:
-            clang.TranslationUnit: The parsed translation unit
-        
+            Clang translation unit
+
         Raises:
-            RuntimeError: If parsing fails
-            LLVMNotFoundError: If LLVM/Clang is not available
+            Exception: If parsing fails
         """
-        if not LLVM_AVAILABLE:
-            raise LLVMNotFoundError()
-        
-        if self.index is None:
-            raise RuntimeError("LLVM context not initialized")
-        
-        args = args or []
-        
         try:
-            # Create an unsaved file for the content
-            unsaved_files = [(filename, content)]
+            compiler_args = self._get_compiler_args(args)
+
+            # Create temporary file
+            unsaved_files = [(filename, source)]
+
+            # Parse the code
             return self.index.parse(
                 filename,
-                args,
-                unsaved_files=unsaved_files,
-                options=clang.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+                args=compiler_args,
+                unsaved_files=unsaved_files
             )
         except Exception as e:
-            raise RuntimeError(f"Failed to parse code: {str(e)}")
+            raise Exception(f"Failed to parse code: {str(e)}") from e
 
+    def parse_file(
+        self,
+        path: Union[str, Path],
+        args: Optional[List[str]] = None
+    ) -> Any:
+        """
+        Parse source file.
 
-def get_cursor_kind_name(cursor: Any) -> str:
-    """Get the string name of a cursor kind."""
-    if not LLVM_AVAILABLE:
-        raise LLVMNotFoundError()
-    return cursor.kind.name
+        Args:
+            path: Path to source file
+            args: Additional compiler arguments
 
+        Returns:
+            Clang translation unit
 
-def get_type_kind_name(type_obj: Any) -> str:
-    """Get the string name of a type kind."""
-    if not LLVM_AVAILABLE:
-        raise LLVMNotFoundError()
-    return type_obj.kind.name
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            Exception: If parsing fails
+        """
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"File not found: {path}")
 
-
-def get_access_specifier_name(cursor: Any) -> str:
-    """Get the string name of an access specifier."""
-    if not LLVM_AVAILABLE:
-        raise LLVMNotFoundError()
-    return cursor.access_specifier.name
+        try:
+            compiler_args = self._get_compiler_args(args)
+            return self.index.parse(str(path), args=compiler_args)
+        except Exception as e:
+            raise Exception(f"Failed to parse {path}: {str(e)}") from e
