@@ -4,9 +4,10 @@
 
 ### Latest Updates
 
+- Completed Tree-sitter integration for Python frontend
 - Added C++ operator overloading support
 - Enhanced LLVM/Clang integration
-- Improved test coverage (80% overall)
+- Improved test coverage (81% overall)
 - Expanded language feature support
 - Enhanced IR system capabilities
 
@@ -27,10 +28,11 @@
   - Language frontend system
   - Grammar management system
 - ✅ Python language support:
+  - Updated frontend to use Tree-sitter for parsing
   - AST to IR conversion
   - Support for functions, classes, imports
   - Control flow handling
-  - Comprehensive test coverage (89%)
+  - Comprehensive test coverage (85%)
 - ✅ JavaScript/TypeScript support:
   - Tree-sitter integration
   - AST to IR conversion
@@ -58,9 +60,9 @@
     - Subscript operator
     - Conversion operators
   - 🔄 LLVM/Clang parsing integration
-- ✅ Comprehensive test suite with high coverage (80%)
+- ✅ Comprehensive test suite with high coverage (81%)
 - ✅ Documentation framework established
-- ✅ Development roadmap created
+- ✅ Development roadmap updated
 
 ### Upcoming Tasks
 
@@ -85,12 +87,12 @@
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 80%
+- **Test Coverage**: 81%
 
   - lapa/**init**.py: 100%
   - lapa/analyzer.py: 88%
-  - lapa/frontend.py: 94%
-  - lapa/frontends/python.py: 89%
+  - lapa/frontend.py: 98%
+  - lapa/frontends/python.py: 85%
   - lapa/frontends/javascript.py: 86%
   - lapa/frontends/cpp.py: 72%
   - lapa/frontends/llvm/**init**.py: 31%
@@ -105,6 +107,7 @@
   Current Support:
 
   - ✅ Python (Complete)
+    - Tree-sitter integration completed
   - ✅ JavaScript/TypeScript (Complete)
   - 🔄 C/C++ (In Progress)
     - ✅ Frontend structure
@@ -147,6 +150,7 @@
   - ✅ Frontend Interface
   - ✅ Grammar Management
   - ✅ Python Support
+    - ✅ Tree-sitter integration
   - ✅ JavaScript Support
   - 🔄 C/C++ Support (In Progress)
     - ✅ Frontend structure
@@ -162,8 +166,8 @@
 
 We are in the early stages of development. If you're interested in contributing, please:
 
-1. Review our CONTRIBUTING.md guide
-2. Check the ROADMAP.md for current priorities
+1. Review our [CONTRIBUTING.md](CONTRIBUTING.md) guide
+2. Check the [ROADMAP.md](ROADMAP.md) for current priorities
 3. Look for issues labeled "good first issue"
 
 ## Next Milestone

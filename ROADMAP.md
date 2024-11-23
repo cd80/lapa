@@ -22,6 +22,7 @@
   - [x] Parser implementation
   - [x] IR conversion
   - [x] Basic analysis capabilities
+  - [x] Tree-sitter integration
 
 - 🔄 JavaScript/TypeScript Support
 
@@ -47,6 +48,7 @@
   - [ ] Ownership system analysis
 
 - [ ] Java Support
+
   - [ ] Frontend structure
   - [ ] JDK integration
   - [ ] AST to IR conversion
@@ -69,6 +71,7 @@
   - [ ] Android framework support
 
 - [ ] Objective-C Support
+
   - [ ] Frontend structure
   - [ ] Clang integration
   - [ ] AST to IR conversion
@@ -84,6 +87,7 @@
   - [ ] Concurrent process analysis
 
 - [ ] Perl Support
+
   - [ ] Frontend structure
   - [ ] Parser implementation
   - [ ] AST to IR conversion
@@ -105,6 +109,7 @@
   - [ ] Memory Analysis
 
 - [ ] Security Analysis
+
   - [ ] Vulnerability Detection
   - [ ] Taint Analysis
   - [ ] Security Policy Enforcement
@@ -118,6 +123,7 @@
   - [ ] Response Verification
 
 - [ ] LLM Features
+
   - [ ] Code Understanding
   - [ ] Documentation Generation
   - [ ] Code Review Assistance
@@ -131,6 +137,7 @@
   - [ ] Automated Optimization
 
 - [ ] Visualization System
+
   - [ ] Graph Generation
   - [ ] Interactive Dashboards
   - [ ] Custom Report Generation
@@ -144,6 +151,7 @@
   - [ ] Jenkins Support
 
 - [ ] Automated Analysis
+
   - [ ] Pre-commit Hooks
   - [ ] Pull Request Analysis
   - [ ] Continuous Monitoring
@@ -157,6 +165,7 @@
   - [ ] Security Scanning
 
 - [ ] Community Features
+
   - [ ] Documentation Portal
   - [ ] Community Guidelines
   - [ ] Contribution System

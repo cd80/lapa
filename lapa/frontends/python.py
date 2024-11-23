@@ -1,239 +1,152 @@
 """
-Python language frontend for LAPA framework.
-
-This module provides the implementation of a Python language frontend
-that parses Python source code into the framework's IR using Python's
-built-in ast module.
+Python frontend implementation using tree-sitter.
 """
 
-import ast
+from typing import Any, Union
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
 
-from ..frontend import LanguageFeatures, LanguageFrontend, ParsingError
-from ..ir import IR, IRNode, IRNodeType, Position
+from ..frontend import (
+    Frontend,
+    LanguageFeature,
+    ParsingError,
+    FrontendRegistry
+)
+from ..ir import IR
+from .grammars import create_parser
 
 
-class PythonFrontend(LanguageFrontend):
-    """Frontend implementation for the Python programming language."""
+class PythonFrontend(Frontend):
+    """Frontend for Python code analysis using tree-sitter."""
 
-    def _get_language_features(self) -> LanguageFeatures:
-        """Get Python language features."""
-        features = LanguageFeatures()
-        features.has_classes = True
-        features.has_interfaces = False  # Python uses abstract base classes instead
-        features.has_generics = True    # Via type hints
-        features.has_exceptions = True
-        features.has_async = True
-        features.has_decorators = True
-        features.has_operator_overloading = True
-        features.has_multiple_inheritance = True
-        features.typing_system = "dynamic"
-        features.memory_management = "gc"
-        return features
+    def __init__(self):
+        """Initialize Python frontend."""
+        super().__init__()
 
-    def parse_file(self, path: Union[str, Path]) -> IR:
-        """Parse a Python source file into IR."""
+        # Register supported features
+        self.features = {
+            LanguageFeature.FUNCTIONS,
+            LanguageFeature.CLASSES,
+            LanguageFeature.INHERITANCE,
+            LanguageFeature.DECORATORS,
+            LanguageFeature.ANNOTATIONS,
+            LanguageFeature.GENERATORS,
+            LanguageFeature.ASYNC_AWAIT,
+            LanguageFeature.EXCEPTIONS,
+            LanguageFeature.GARBAGE_COLLECTION,
+            LanguageFeature.MODULES,
+            LanguageFeature.PACKAGES,
+            LanguageFeature.TYPE_INFERENCE,
+            LanguageFeature.LAMBDA_FUNCTIONS,
+            LanguageFeature.REFLECTION,
+            LanguageFeature.COMPILE_TIME_EVALUATION
+        }
+
+        # Register supported file extensions
+        self.file_extensions = {".py", ".pyi", ".pyx", ".pxd"}
+
+        # Initialize parser
+        self.parser = None
+        self.language = None
+
+    def supports_language(self, language: str) -> bool:
+        """Check if frontend supports a language."""
+        return language.lower() == "python"
+
+    def _ensure_parser(self) -> None:
+        """Ensure parser is initialized."""
+        if self.parser is None:
+            try:
+                self.parser = create_parser("python")
+            except Exception as e:
+                raise RuntimeError(f"Failed to initialize parser: {str(e)}")
+
+    def parse_file(self, path: Union[str, Path], ir: IR) -> None:
+        """
+        Parse a Python source file and update the IR.
+
+        Args:
+            path: Path to source file
+            ir: IR to update
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ParsingError: If parsing fails
+        """
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
-        
+
         try:
-            with open(path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            return self.parse_string(content, str(path))
+            with open(path, "r", encoding="utf-8") as f:
+                source = f.read()
+            self.parse_string(source, ir)
         except Exception as e:
             raise ParsingError(f"Failed to parse {path}: {str(e)}")
 
-    def parse_string(self, content: str, filename: str = "<string>") -> IR:
-        """Parse Python source code from a string into IR."""
+    def parse_string(self, source: str, ir: IR) -> None:
+        """
+        Parse Python source code string and update the IR.
+
+        Args:
+            source: Source code string
+            ir: IR to update
+
+        Raises:
+            ParsingError: If parsing fails
+        """
         try:
-            tree = ast.parse(content, filename)
-            self.ir.clear()  # Reset IR before parsing
-            self._process_ast(tree, filename)
-            return self.ir
-        except SyntaxError as e:
-            position = Position(
-                line=e.lineno or 0,
-                column=e.offset or 0,
-                file=filename
-            )
-            raise ParsingError(str(e), position)
+            self._ensure_parser()
+            tree = self.parser.parse(bytes(source, "utf8"))
+            if tree.root_node.has_error:
+                raise ParsingError("Syntax error in source code")
+            self._process_ast(tree.root_node, ir)
         except Exception as e:
-            raise ParsingError(f"Failed to parse Python code: {str(e)}")
+            raise ParsingError(f"Failed to parse source: {str(e)}")
 
-    def get_file_extensions(self) -> List[str]:
-        """Get supported Python file extensions."""
-        return [".py", ".pyw"]
+    def _process_ast(self, node: Any, ir: IR) -> None:
+        """
+        Process Python AST and update IR.
 
-    def _process_ast(self, node: ast.AST, filename: str) -> None:
-        """Process Python AST and convert it to IR."""
-        visitor = PythonASTVisitor(self.ir, filename)
-        visitor.visit(node)
+        Args:
+            node: AST node
+            ir: IR to update
+        """
+        # Process imports
+        if node.type == "import_statement":
+            self._process_import(node, ir)
+        elif node.type == "import_from_statement":
+            self._process_import_from(node, ir)
 
+        # Process declarations
+        elif node.type == "function_definition":
+            self._process_function(node, ir)
+        elif node.type == "class_definition":
+            self._process_class(node, ir)
 
-class PythonASTVisitor(ast.NodeVisitor):
-    """AST visitor that converts Python AST to LAPA IR."""
+        # Process children nodes
+        for child in node.children:
+            self._process_ast(child, ir)
 
-    def __init__(self, ir: IR, filename: str):
-        self.ir = ir
-        self.filename = filename
-        self.current_node = ir.root
-
-    def _create_position(self, node: ast.AST) -> Position:
-        """Create Position object from AST node."""
-        return Position(
-            line=getattr(node, 'lineno', 0),
-            column=getattr(node, 'col_offset', 0),
-            file=self.filename
-        )
-
-    def _create_ir_node(
-        self,
-        node: ast.AST,
-        node_type: IRNodeType,
-        attributes: Optional[Dict[str, Any]] = None
-    ) -> IRNode:
-        """Create an IR node from an AST node."""
-        ir_node = IRNode(
-            node_type=node_type,
-            position=self._create_position(node),
-            attributes=attributes or {}
-        )
-        self.current_node.add_child(ir_node)
-        return ir_node
-
-    def visit_Module(self, node: ast.Module) -> None:
-        """Process module node."""
-        # Module node is already represented by IR root
-        self.generic_visit(node)
-
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """Process function definition."""
-        attributes = {
-            'name': node.name,
-            'is_async': False,
-            'decorators': [ast.unparse(d) for d in node.decorator_list],
-            'returns': ast.unparse(node.returns) if node.returns else None
-        }
-        
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.FUNCTION, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        """Process async function definition."""
-        attributes = {
-            'name': node.name,
-            'is_async': True,
-            'decorators': [ast.unparse(d) for d in node.decorator_list],
-            'returns': ast.unparse(node.returns) if node.returns else None
-        }
-        
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.FUNCTION, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """Process class definition."""
-        attributes = {
-            'name': node.name,
-            'bases': [ast.unparse(b) for b in node.bases],
-            'decorators': [ast.unparse(d) for d in node.decorator_list],
-            'keywords': {k.arg: ast.unparse(k.value) for k in node.keywords}
-        }
-        
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.CLASS, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_Import(self, node: ast.Import) -> None:
+    def _process_import(self, node: Any, ir: IR) -> None:
         """Process import statement."""
-        for name in node.names:
-            attributes = {
-                'name': name.name,
-                'asname': name.asname
-            }
-            self._create_ir_node(node, IRNodeType.IMPORT, attributes)
+        # TODO: Implement import processing
+        pass
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
-        """Process from-import statement."""
-        for name in node.names:
-            attributes = {
-                'module': node.module,
-                'name': name.name,
-                'asname': name.asname,
-                'level': node.level
-            }
-            self._create_ir_node(node, IRNodeType.IMPORT, attributes)
+    def _process_import_from(self, node: Any, ir: IR) -> None:
+        """Process 'from ... import ...' statement."""
+        # TODO: Implement 'import from' processing
+        pass
 
-    def visit_Assign(self, node: ast.Assign) -> None:
-        """Process assignment."""
-        attributes = {
-            'targets': [ast.unparse(t) for t in node.targets],
-            'value': ast.unparse(node.value)
-        }
-        self._create_ir_node(node, IRNodeType.ASSIGNMENT, attributes)
+    def _process_function(self, node: Any, ir: IR) -> None:
+        """Process function definition."""
+        # TODO: Implement function processing
+        pass
 
-    def visit_Call(self, node: ast.Call) -> None:
-        """Process function/method call."""
-        attributes = {
-            'func': ast.unparse(node.func),
-            'args': [ast.unparse(arg) for arg in node.args],
-            'keywords': {k.arg: ast.unparse(k.value) for k in node.keywords}
-        }
-        self._create_ir_node(node, IRNodeType.CALL, attributes)
+    def _process_class(self, node: Any, ir: IR) -> None:
+        """Process class definition."""
+        # TODO: Implement class processing
+        pass
 
-    def visit_Return(self, node: ast.Return) -> None:
-        """Process return statement."""
-        attributes = {
-            'value': ast.unparse(node.value) if node.value else None
-        }
-        self._create_ir_node(node, IRNodeType.RETURN, attributes)
 
-    def visit_If(self, node: ast.If) -> None:
-        """Process if statement."""
-        attributes = {
-            'test': ast.unparse(node.test)
-        }
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.CONTROL_FLOW, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_For(self, node: ast.For) -> None:
-        """Process for loop."""
-        attributes = {
-            'target': ast.unparse(node.target),
-            'iter': ast.unparse(node.iter),
-            'is_async': False
-        }
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.LOOP, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_AsyncFor(self, node: ast.AsyncFor) -> None:
-        """Process async for loop."""
-        attributes = {
-            'target': ast.unparse(node.target),
-            'iter': ast.unparse(node.iter),
-            'is_async': True
-        }
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.LOOP, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
-
-    def visit_While(self, node: ast.While) -> None:
-        """Process while loop."""
-        attributes = {
-            'test': ast.unparse(node.test)
-        }
-        prev_node = self.current_node
-        self.current_node = self._create_ir_node(node, IRNodeType.LOOP, attributes)
-        self.generic_visit(node)
-        self.current_node = prev_node
+# Register frontend
+FrontendRegistry.register("python", PythonFrontend)
