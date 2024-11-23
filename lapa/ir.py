@@ -1,33 +1,38 @@
 """
-Intermediate Representation (IR) module for LAPA framework.
+Intermediate Representation (IR) for LAPA framework.
 
-This module defines the core IR system that serves as a common representation
-for code analysis across different programming languages.
+This module defines the core IR classes and utilities used throughout
+the framework for representing and manipulating program structures.
 """
 
-from typing import Any, Dict, List, Optional, Set
-from dataclasses import dataclass
 from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Set, Union
+from dataclasses import dataclass
 
 
 class IRNodeType(Enum):
-    """Enumeration of possible IR node types."""
+    """Types of IR nodes."""
     PROGRAM = auto()
     FUNCTION = auto()
     CLASS = auto()
     METHOD = auto()
     VARIABLE = auto()
+    FIELD = auto()
+    NAMESPACE = auto()
+    CONSTRUCTOR = auto()
+    DESTRUCTOR = auto()
+    TEMPLATE = auto()
+    USING = auto()
+    FRIEND = auto()
+    IMPORT = auto()
+    EXPORT = auto()
+    MODULE = auto()
+    PACKAGE = auto()
+    RETURN = auto()
     ASSIGNMENT = auto()
-    CALL = auto()
     CONTROL_FLOW = auto()
     LOOP = auto()
-    CONDITION = auto()
-    RETURN = auto()
-    LITERAL = auto()
-    OPERATOR = auto()
-    IMPORT = auto()
-    MODULE = auto()
-    UNKNOWN = auto()
+    CALL = auto()
 
 
 @dataclass
@@ -38,154 +43,135 @@ class Position:
     file: str
 
 
-@dataclass
 class IRNode:
-    """
-    Base class for IR nodes.
+    """Node in the intermediate representation."""
     
-    Represents a single node in the IR tree structure.
-    """
-    node_type: IRNodeType
-    position: Optional[Position]
-    children: List['IRNode']
-    parent: Optional['IRNode']
-    attributes: Dict[str, Any]
-
     def __init__(
         self,
         node_type: IRNodeType,
         position: Optional[Position] = None,
-        children: Optional[List['IRNode']] = None,
-        parent: Optional['IRNode'] = None,
         attributes: Optional[Dict[str, Any]] = None
     ):
         """
         Initialize an IR node.
-
+        
         Args:
             node_type: Type of the node
-            position: Source position information
-            children: List of child nodes
-            parent: Parent node
+            position: Source code position
             attributes: Additional node attributes
         """
         self.node_type = node_type
         self.position = position
-        self.children = children or []
-        self.parent = parent
         self.attributes = attributes or {}
-
+        self.children: List[IRNode] = []
+        self.parent: Optional[IRNode] = None
+    
     def add_child(self, child: 'IRNode') -> None:
         """Add a child node."""
-        child.parent = self
         self.children.append(child)
-
+        child.parent = self
+    
     def remove_child(self, child: 'IRNode') -> None:
         """Remove a child node."""
-        if child in self.children:
-            child.parent = None
-            self.children.remove(child)
+        self.children.remove(child)
+        child.parent = None
+    
+    def get_symbols(self) -> Dict[str, Any]:
+        """Get all symbol names defined in this node and its children."""
+        symbols = {}
+        if "name" in self.attributes:
+            symbols[self.attributes["name"]] = self.attributes
+        for child in self.children:
+            symbols.update(child.get_symbols())
+        return symbols
+    
+    def get_types(self) -> Dict[str, Any]:
+        """Get all type names used in this node and its children."""
+        types = {}
+        if "type" in self.attributes:
+            types[self.attributes["type"]] = self.attributes
+        if "return_type" in self.attributes:
+            types[self.attributes["return_type"]] = self.attributes
+        for child in self.children:
+            types.update(child.get_types())
+        return types
+    
+    def get_dependencies(self) -> Set[str]:
+        """Get all external dependencies used in this node and its children."""
+        deps = set()
+        if "source" in self.attributes:
+            deps.add(self.attributes["source"])
+        for child in self.children:
+            deps.update(child.get_dependencies())
+        return deps
+    
+    def get_node_by_position(self, position: Position) -> Optional['IRNode']:
+        """Find a node at the given source position."""
+        if self.position and self.position.file == position.file:
+            if (self.position.line == position.line and
+                self.position.column <= position.column):
+                return self
+        
+        for child in self.children:
+            result = child.get_node_by_position(position)
+            if result:
+                return result
+        
+        return None
 
 
 class IR:
-    """
-    Main IR class that manages the intermediate representation of code.
+    """Complete intermediate representation of a program."""
     
-    This class provides the core functionality for building, manipulating,
-    and analyzing the intermediate representation of source code.
-    """
-
     def __init__(self):
         """Initialize an empty IR."""
         self.root = IRNode(IRNodeType.PROGRAM)
         self.symbol_table: Dict[str, Any] = {}
         self.type_information: Dict[str, Any] = {}
         self.dependencies: Set[str] = set()
-
+    
     def clear(self) -> None:
-        """Clear the IR state."""
+        """Clear the IR."""
         self.root = IRNode(IRNodeType.PROGRAM)
         self.symbol_table.clear()
         self.type_information.clear()
         self.dependencies.clear()
-
-    def build_from_ast(self, ast: Any) -> None:
-        """
-        Build IR from an Abstract Syntax Tree.
-
-        Args:
-            ast: The AST to convert to IR
-
-        Raises:
-            ValueError: If the AST is invalid
-            NotImplementedError: If the language is not supported
-        """
-        # TODO: Implement AST to IR conversion
-        raise NotImplementedError("AST to IR conversion not yet implemented")
-
-    def optimize(self) -> None:
-        """
-        Perform IR-level optimizations.
-        """
-        # TODO: Implement IR optimizations
-        raise NotImplementedError("IR optimization not yet implemented")
-
+    
     def validate(self) -> bool:
-        """
-        Validate the IR structure.
-
-        Returns:
-            True if the IR is valid, False otherwise
-        """
-        # TODO: Implement IR validation
+        """Validate the IR structure."""
+        # TODO: Implement validation
         return True
-
+    
+    def build_from_ast(self, ast: Any) -> None:
+        """Build IR from an AST."""
+        raise NotImplementedError("build_from_ast not implemented")
+    
+    def optimize(self) -> None:
+        """Optimize the IR."""
+        raise NotImplementedError("optimize not implemented")
+    
     def to_dot(self) -> str:
-        """
-        Convert IR to DOT format for visualization.
-
-        Returns:
-            DOT representation of the IR
-        """
-        # TODO: Implement DOT conversion
-        raise NotImplementedError("DOT conversion not yet implemented")
-
+        """Convert to DOT format for visualization."""
+        raise NotImplementedError("to_dot not implemented")
+    
     def get_node_by_position(self, position: Position) -> Optional[IRNode]:
-        """
-        Find IR node at a specific source position.
-
-        Args:
-            position: Source position to look up
-
-        Returns:
-            IR node at the position, if found
-        """
-        # TODO: Implement position-based node lookup
-        return None
-
+        """Find a node at the given source position."""
+        return self.root.get_node_by_position(position)
+    
     def get_symbols(self) -> Dict[str, Any]:
-        """
-        Get the current symbol table.
-
-        Returns:
-            Dictionary of symbols and their information
-        """
-        return self.symbol_table.copy()
-
+        """Get all symbol names defined in the IR."""
+        symbols = dict(self.symbol_table)
+        symbols.update(self.root.get_symbols())
+        return symbols
+    
     def get_types(self) -> Dict[str, Any]:
-        """
-        Get type information.
-
-        Returns:
-            Dictionary of types and their information
-        """
-        return self.type_information.copy()
-
+        """Get all type names used in the IR."""
+        types = dict(self.type_information)
+        types.update(self.root.get_types())
+        return types
+    
     def get_dependencies(self) -> Set[str]:
-        """
-        Get code dependencies.
-
-        Returns:
-            Set of dependency identifiers
-        """
-        return self.dependencies.copy()
+        """Get all external dependencies used in the IR."""
+        deps = set(self.dependencies)
+        deps.update(self.root.get_dependencies())
+        return deps
