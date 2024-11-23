@@ -10,12 +10,13 @@ from pathlib import Path
 
 from .ir import IR
 from .plugin import Plugin
+from .analysis.control_flow import ControlFlowAnalyzer
 
 
 class Analyzer:
     """
     Main analyzer class that coordinates program analysis tasks.
-    
+
     This class serves as the primary interface for users of the LAPA framework.
     It coordinates between different components like the IR system, analysis
     plugins, and LLM integration.
@@ -36,14 +37,14 @@ class Analyzer:
         self.config = config or {}
         self.plugins = plugins or []
         self.ir = IR()
-        
+
     def load_file(self, path: Union[str, Path]) -> None:
         """
         Load a source file for analysis.
 
         Args:
             path: Path to the source file
-        
+
         Raises:
             FileNotFoundError: If the file doesn't exist
             ValueError: If the file type is not supported
@@ -51,7 +52,7 @@ class Analyzer:
         path = Path(path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
-        
+
         # TODO: Implement file loading and parsing
         raise NotImplementedError("File loading not yet implemented")
 
@@ -61,14 +62,14 @@ class Analyzer:
 
         Args:
             path: Path to the directory
-        
+
         Raises:
             NotADirectoryError: If the path is not a directory
         """
         path = Path(path)
         if not path.is_dir():
             raise NotADirectoryError(f"Not a directory: {path}")
-        
+
         # TODO: Implement directory scanning and loading
         raise NotImplementedError("Directory loading not yet implemented")
 
@@ -94,6 +95,13 @@ class Analyzer:
         # TODO: Implement analysis pipeline
         raise NotImplementedError("Analysis not yet implemented")
 
+    def perform_control_flow_analysis(self) -> None:
+        """
+        Perform control flow analysis on the current IR.
+        """
+        analyzer = ControlFlowAnalyzer()
+        analyzer.analyze(self.ir)
+
     def get_ir(self) -> IR:
         """
         Get the current Intermediate Representation.
@@ -109,7 +117,7 @@ class Analyzer:
 
         Args:
             plugin: Plugin instance to add
-        
+
         Raises:
             ValueError: If plugin is invalid or incompatible
         """
