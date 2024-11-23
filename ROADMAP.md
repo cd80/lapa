@@ -1,48 +1,95 @@
 # LAPA Development Roadmap
 
-## Phase 1: Foundation (Current Phase)
+## Phase 1: Foundation and Initial Language Support
 
-- [ ] Project Setup
+- [x] Project Setup
 
   - [x] Initialize repository structure
-  - [ ] Set up development environment
-  - [ ] Configure build system
-  - [ ] Set up testing framework
-  - [ ] Set up documentation system
+  - [x] Set up development environment
+  - [x] Configure build system
+  - [x] Set up testing framework
+  - [x] Set up documentation system
 
-- [ ] Core Architecture
+- [x] Core Architecture
 
-  - [ ] Design Intermediate Representation (IR)
-  - [ ] Implement basic IR data structures
-  - [ ] Create plugin system architecture
-  - [ ] Design language frontend interface
+  - [x] Design Intermediate Representation (IR)
+  - [x] Implement basic IR data structures
+  - [x] Create plugin system architecture
+  - [x] Design language frontend interface
 
-- [ ] Basic Analysis Framework
-  - [ ] Implement AST parsing infrastructure
-  - [ ] Create basic static analysis framework
-  - [ ] Set up analysis pipeline system
-  - [ ] Implement basic reporting system
+- [x] Python Support
 
-## Phase 2: Language Support
+  - [x] Parser implementation
+  - [x] IR conversion
+  - [x] Basic analysis capabilities
 
-- [ ] Python Support
+- 🔄 JavaScript/TypeScript Support
 
-  - [ ] Parser implementation
-  - [ ] IR conversion
-  - [ ] Basic analysis capabilities
+  - [x] Frontend structure
+  - [x] Feature detection
+  - [ ] Tree-sitter integration
+  - [ ] AST to IR conversion
+  - [ ] TypeScript-specific features
 
-- [ ] JavaScript/TypeScript Support
+- [ ] C/C++ Support
 
-  - [ ] Parser implementation
-  - [ ] IR conversion
-  - [ ] Basic analysis capabilities
+  - [ ] Frontend structure
+  - [ ] LLVM integration
+  - [ ] AST to IR conversion
+  - [ ] Preprocessor handling
+  - [ ] Template support
+
+- [ ] Rust Support
+
+  - [ ] Frontend structure
+  - [ ] Cargo integration
+  - [ ] AST to IR conversion
+  - [ ] Ownership system analysis
 
 - [ ] Java Support
-  - [ ] Parser implementation
-  - [ ] IR conversion
-  - [ ] Basic analysis capabilities
+  - [ ] Frontend structure
+  - [ ] JDK integration
+  - [ ] AST to IR conversion
+  - [ ] Bytecode analysis
 
-## Phase 3: Analysis Techniques
+## Phase 2: Extended Language Support
+
+- [ ] Swift Support
+
+  - [ ] Frontend structure
+  - [ ] Swift compiler integration
+  - [ ] AST to IR conversion
+  - [ ] iOS/macOS framework support
+
+- [ ] Kotlin Support
+
+  - [ ] Frontend structure
+  - [ ] Kotlin compiler integration
+  - [ ] AST to IR conversion
+  - [ ] Android framework support
+
+- [ ] Objective-C Support
+  - [ ] Frontend structure
+  - [ ] Clang integration
+  - [ ] AST to IR conversion
+  - [ ] iOS/macOS framework support
+
+## Phase 3: Additional Language Support
+
+- [ ] Erlang Support
+
+  - [ ] Frontend structure
+  - [ ] OTP integration
+  - [ ] AST to IR conversion
+  - [ ] Concurrent process analysis
+
+- [ ] Perl Support
+  - [ ] Frontend structure
+  - [ ] Parser implementation
+  - [ ] AST to IR conversion
+  - [ ] Legacy code analysis
+
+## Phase 4: Analysis Techniques
 
 - [ ] Static Analysis
 
@@ -62,7 +109,7 @@
   - [ ] Taint Analysis
   - [ ] Security Policy Enforcement
 
-## Phase 4: LLM Integration
+## Phase 5: LLM Integration
 
 - [ ] LLM Infrastructure
 
@@ -75,7 +122,7 @@
   - [ ] Documentation Generation
   - [ ] Code Review Assistance
 
-## Phase 5: Advanced Features
+## Phase 6: Advanced Features
 
 - [ ] Machine Learning Components
 
@@ -88,7 +135,7 @@
   - [ ] Interactive Dashboards
   - [ ] Custom Report Generation
 
-## Phase 6: DevOps Integration
+## Phase 7: DevOps Integration
 
 - [ ] CI/CD Integration
 
@@ -101,7 +148,7 @@
   - [ ] Pull Request Analysis
   - [ ] Continuous Monitoring
 
-## Phase 7: Plugin Ecosystem
+## Phase 8: Plugin Ecosystem
 
 - [ ] Plugin Marketplace
 
@@ -116,7 +163,9 @@
 
 ## Future Considerations
 
-- [ ] Additional Language Support
-- [ ] Advanced IR Optimizations
 - [ ] Cloud Integration
 - [ ] Enterprise Features
+- [ ] Additional Language Support
+- [ ] Advanced IR Optimizations
+- [ ] Cross-Language Analysis
+- [ ] Performance Improvements

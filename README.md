@@ -18,72 +18,29 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
 
 ## Supported Languages
 
+### Current Support
+
 - ✅ Python (Complete)
 - 🔄 JavaScript/TypeScript (In Progress)
-- 📅 Java (Planned)
-- 📅 C/C++ (Planned)
-- 📅 Rust (Planned)
-- 📅 Swift (Planned)
-- 📅 Kotlin (Planned)
 
-## Installation
+### Planned Support
 
-### Prerequisites
+Phase 1:
 
-- Python 3.8 or higher
-- pip package manager
-- virtualenv (recommended)
+- 📅 C/C++
+- 📅 Rust
+- 📅 Java
 
-### Basic Installation
+Phase 2:
 
-```bash
-# Create and activate virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+- 📅 Swift
+- 📅 Kotlin
+- 📅 Objective-C
 
-# Install from requirements
-pip install -r requirements.txt
-```
+Phase 3:
 
-### Development Installation
-
-```bash
-# Install development dependencies
-pip install -r requirements.txt
-
-# Install in editable mode
-pip install -e .
-```
-
-### Language-Specific Requirements
-
-#### Python Support
-
-- No additional requirements (built-in ast module used)
-
-#### JavaScript/TypeScript Support
-
-- Requires tree-sitter and language grammars:
-
-```bash
-pip install tree-sitter tree-sitter-javascript
-```
-
-## Quick Start
-
-```python
-from lapa import Analyzer
-
-# Initialize analyzer
-analyzer = Analyzer()
-
-# Analyze Python code
-results = analyzer.analyze("path/to/code.py")
-
-# Access analysis results
-for issue in results.issues:
-    print(f"{issue.severity}: {issue.message} at {issue.location}")
-```
+- 📅 Erlang
+- 📅 Perl
 
 ## Core Analysis Techniques
 
@@ -111,62 +68,41 @@ for issue in results.issues:
 - Automated optimization suggestions
 - Context-aware analysis
 
-## Development
-
-### Running Tests
+## Installation
 
 ```bash
-# Run all tests
-pytest
-
-# Run with coverage report
-pytest --cov=lapa
-
-# Run specific test file
-pytest tests/test_specific.py
+# Coming soon
+pip install lapa
 ```
 
-### Code Style
+## Quick Start
 
-The project uses:
+```python
+# Coming soon
+from lapa import Analyzer
 
-- Black for code formatting
-- isort for import sorting
-- mypy for type checking
-- pylint for linting
+# Initialize analyzer
+analyzer = Analyzer()
 
-```bash
-# Format code
-black .
-isort .
-
-# Type check
-mypy .
-
-# Lint
-pylint lapa tests
+# Analyze code
+results = analyzer.analyze("path/to/code")
 ```
 
 ## Documentation
 
-Detailed documentation is under development. To build the docs:
-
-```bash
-cd docs
-make html
-```
+Detailed documentation is under development.
 
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
 ## Project Status
 
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for current development status and [ROADMAP.md](ROADMAP.md) for planned features and milestones.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Author
 

@@ -44,10 +44,10 @@
 
 ### Upcoming Tasks
 
-1. Resolve tree-sitter integration for JavaScript parsing
-2. Implement JavaScript AST to IR conversion
-3. Add TypeScript-specific parsing features
-4. Begin work on analysis features
+1. Complete JavaScript/TypeScript parsing implementation
+2. Begin C/C++ frontend development
+3. Start Rust frontend implementation
+4. Prepare Java frontend structure
 
 ### Known Issues
 
@@ -58,7 +58,7 @@
 
 1. Research alternative approaches for tree-sitter integration
 2. Implement basic JavaScript parsing functionality
-3. Set up TypeScript-specific features
+3. Set up C/C++ development environment
 4. Begin analysis algorithms implementation
 
 ## Statistics
@@ -66,6 +66,7 @@
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
 - **Test Coverage**: 86%
+
   - lapa/**init**.py: 100%
   - lapa/analyzer.py: 88%
   - lapa/frontend.py: 94%
@@ -73,11 +74,30 @@
   - lapa/frontends/javascript.py: 82%
   - lapa/ir.py: 99%
   - lapa/plugin.py: 69%
-- **Supported Languages**:
+
+- **Language Support Status**:
+  Current Support:
+
   - ✅ Python (Complete)
   - 🔄 JavaScript/TypeScript (Structure Ready)
+
+  Phase 1 (In Progress):
+
+  - 📅 C/C++ (Planned)
+  - 📅 Rust (Planned)
   - 📅 Java (Planned)
-  - 📅 Others (Future)
+
+  Phase 2 (Upcoming):
+
+  - 📅 Swift (Planned)
+  - 📅 Kotlin (Planned)
+  - 📅 Objective-C (Planned)
+
+  Phase 3 (Future):
+
+  - 📅 Erlang (Planned)
+  - 📅 Perl (Planned)
+
 - **Core Systems**:
   - ✅ Analyzer
   - ✅ IR System
@@ -99,5 +119,6 @@ We are in the early stages of development. If you're interested in contributing,
 ## Next Milestone
 
 - Complete JavaScript/TypeScript parsing implementation
+- Begin C/C++ frontend development
+- Start Rust frontend implementation
 - Resolve tree-sitter integration challenges
-- Begin development of basic analysis capabilities
