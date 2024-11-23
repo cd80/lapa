@@ -4,14 +4,15 @@
 
 ### Latest Updates
 
-- Completed C/C++ frontend infrastructure
-- Implemented LLVM/Clang integration module
-- Enhanced IR system with comprehensive node types
-- Achieved high test coverage (78% overall)
+- Added C++ template support
+- Enhanced LLVM/Clang integration
+- Improved test coverage (79% overall)
+- Expanded language feature support
+- Enhanced IR system capabilities
 
 ### Current Focus
 
-- Implementing C/C++ parsing with LLVM/Clang
+- Implementing C++ operator overloading
 - Enhancing IR system capabilities
 - Developing initial analysis features
 - Planning Rust frontend implementation
@@ -44,39 +45,42 @@
   - ✅ Language feature definitions
   - ✅ File extension support
   - ✅ Test suite setup
+  - ✅ Template support (88% coverage)
+    - Type parameters
+    - Non-type parameters
+    - Template template parameters
+    - Specializations
   - 🔄 LLVM/Clang parsing integration
-  - 📅 Template support
   - 📅 Operator overloading
-- ✅ Comprehensive test suite with high coverage (78%)
+- ✅ Comprehensive test suite with high coverage (79%)
 - ✅ Documentation framework established
 - ✅ Development roadmap created
 
 ### Upcoming Tasks
 
-1. Complete LLVM/Clang parsing integration
-2. Implement C++ template handling
-3. Add operator overloading support
-4. Begin Rust frontend planning
+1. Complete operator overloading support
+2. Improve LLVM/Clang parsing integration
+3. Begin Rust frontend planning
+4. Start implementing analysis features
 
 ### Known Issues
 
 - LLVM/Clang integration module needs more test coverage
-- Need to implement C++ template handling
-- Need to support C++ operator overloading
+- Need to implement operator overloading support
 - Need to improve error messages for missing LLVM/Clang
 
 ### Current Priorities
 
-1. Improve LLVM/Clang integration test coverage
-2. Implement C++ template support
-3. Add operator overloading support
-4. Begin Rust frontend planning
+1. Implement operator overloading support
+2. Improve LLVM/Clang integration test coverage
+3. Begin Rust frontend planning
+4. Start implementing analysis features
 
 ## Statistics
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 78%
+- **Test Coverage**: 79%
 
   - lapa/**init**.py: 100%
   - lapa/analyzer.py: 88%
@@ -86,6 +90,7 @@
   - lapa/frontends/cpp.py: 72%
   - lapa/frontends/llvm/**init**.py: 31%
   - lapa/frontends/llvm/ast.py: 82%
+  - lapa/frontends/llvm/template.py: 88%
   - lapa/frontends/grammars/**init**.py: 100%
   - lapa/ir.py: 81%
   - lapa/plugin.py: 69%
@@ -99,8 +104,12 @@
     - ✅ Frontend structure
     - ✅ LLVM integration
     - ✅ AST conversion design
+    - ✅ Template support
+      - Type parameters
+      - Non-type parameters
+      - Template templates
+      - Specializations
     - 🔄 Parsing integration
-    - 📅 Template support
     - 📅 Operator overloading
 
   Phase 1 (In Progress):
@@ -131,8 +140,9 @@
     - ✅ Frontend structure
     - ✅ LLVM integration
     - ✅ AST conversion
+    - ✅ Template support
     - 🔄 Parsing integration
-    - 📅 Template handling
+    - 📅 Operator handling
   - 🔄 Analysis Features (In Progress)
   - 📅 LLM Integration (Planned)
 
@@ -147,9 +157,9 @@ We are in the early stages of development. If you're interested in contributing,
 ## Next Milestone
 
 - Complete C/C++ frontend implementation
+  - Implement operator overloading
   - Improve LLVM integration test coverage
-  - Implement template support
-  - Handle operator overloading
+  - Complete parsing integration
 - Begin Rust frontend development
 - Implement basic analysis capabilities
 - Enhance IR optimization features
