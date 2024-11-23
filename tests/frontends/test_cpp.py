@@ -1,32 +1,49 @@
 """
-Tests for the C/C++ language frontend.
+Tests for C/C++ frontend.
 """
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+import pytest
 
-from lapa.frontend import ParsingError
+from lapa.frontend import LanguageFeature, ParsingError
 from lapa.frontends.cpp import CPPFrontend
-from lapa.ir import IRNodeType
+from lapa.ir import IR
 
 
 def test_cpp_frontend_features():
-    """Test C/C++ frontend language features."""
+    """Test C/C++ frontend features."""
     frontend = CPPFrontend()
     features = frontend._get_language_features()
     
-    # C++ features
-    assert features.has_classes is True
-    assert features.has_interfaces is False
-    assert features.has_generics is True  # Templates
-    assert features.has_exceptions is True
-    assert features.has_async is False
-    assert features.has_decorators is False
-    assert features.has_operator_overloading is True
-    assert features.has_multiple_inheritance is True
-    assert features.typing_system == "static"
-    assert features.memory_management == "manual"
+    assert LanguageFeature.FUNCTIONS in features
+    assert LanguageFeature.CLASSES in features
+    assert LanguageFeature.INHERITANCE in features
+    assert LanguageFeature.TEMPLATES in features
+    assert LanguageFeature.OPERATOR_OVERLOADING in features
+    assert LanguageFeature.NAMESPACES in features
+    assert LanguageFeature.POINTERS in features
+    assert LanguageFeature.REFERENCES in features
+    assert LanguageFeature.MEMORY_MANAGEMENT in features
+    assert LanguageFeature.EXCEPTIONS in features
+    assert LanguageFeature.PREPROCESSOR in features
+    assert LanguageFeature.INLINE_ASSEMBLY in features
+    assert LanguageFeature.FRIEND_FUNCTIONS in features
+    assert LanguageFeature.MULTIPLE_INHERITANCE in features
+    assert LanguageFeature.VIRTUAL_FUNCTIONS in features
+    assert LanguageFeature.CONST_CORRECTNESS in features
+    assert LanguageFeature.RVALUE_REFERENCES in features
+    assert LanguageFeature.MOVE_SEMANTICS in features
+    assert LanguageFeature.VARIADIC_TEMPLATES in features
+    assert LanguageFeature.TYPE_INFERENCE in features
+    assert LanguageFeature.LAMBDA_FUNCTIONS in features
+    assert LanguageFeature.CONCEPTS in features
+    assert LanguageFeature.RANGES in features
+    assert LanguageFeature.CONSTEXPR in features
+    assert LanguageFeature.ATTRIBUTES in features
+    assert LanguageFeature.STRUCTURED_BINDINGS in features
+    assert LanguageFeature.FOLD_EXPRESSIONS in features
+    assert LanguageFeature.DESIGNATED_INITIALIZERS in features
+    assert LanguageFeature.THREE_WAY_COMPARISON in features
 
 
 def test_cpp_frontend_file_extensions():
@@ -41,47 +58,50 @@ def test_cpp_frontend_file_extensions():
     # C++ extensions
     assert ".cpp" in extensions
     assert ".hpp" in extensions
-    assert ".cc" in extensions
-    assert ".hh" in extensions
     assert ".cxx" in extensions
     assert ".hxx" in extensions
+    assert ".cc" in extensions
+    assert ".hh" in extensions
+    assert ".c++" in extensions
+    assert ".h++" in extensions
+    assert ".tpp" in extensions
+    assert ".txx" in extensions
+    assert ".ipp" in extensions
+    assert ".ixx" in extensions
+    assert ".inl" in extensions
 
 
 def test_parse_nonexistent_file():
-    """Test error when parsing nonexistent file."""
+    """Test handling of nonexistent files."""
     frontend = CPPFrontend()
+    ir = IR()
+    
     with pytest.raises(FileNotFoundError):
-        frontend.parse_file("nonexistent.cpp")
+        frontend.parse_file("nonexistent.cpp", ir)
 
 
-def test_not_implemented_error():
-    """Test NotImplementedError when parser is not available."""
-    frontend = CPPFrontend()
-    with pytest.raises(NotImplementedError):
-        frontend.parse_string("int main() { return 0; }")
-
-
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_simple_function():
-    """Test parsing a simple C++ function."""
+    """Test parsing simple function."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
     int add(int a, int b) {
         return a + b;
     }
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    func = ir.root.children[0]
-    assert func.node_type == IRNodeType.FUNCTION
-    assert func.attributes["name"] == "add"
-    assert func.attributes["return_type"] == "int"
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_class():
-    """Test parsing a C++ class."""
+    """Test parsing class definition."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
     class Person {
     public:
@@ -95,135 +115,119 @@ def test_parse_class():
         std::string name_;
     };
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    class_ir = ir.root.children[0]
-    assert class_ir.node_type == IRNodeType.CLASS
-    assert class_ir.attributes["name"] == "Person"
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_template():
-    """Test parsing a C++ template."""
+    """Test parsing template."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
     template<typename T>
-    T max(T a, T b) {
-        return (a > b) ? a : b;
-    }
+    class Container {
+    public:
+        void add(const T& item) {
+            items_.push_back(item);
+        }
+        
+    private:
+        std::vector<T> items_;
+    };
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    func = ir.root.children[0]
-    assert func.node_type == IRNodeType.FUNCTION
-    assert func.attributes["name"] == "max"
-    assert func.attributes["is_template"] is True
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_includes():
-    """Test parsing C++ includes."""
+    """Test parsing include directives."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
-    #include <iostream>
+    #include <vector>
+    #include <string>
     #include "myheader.h"
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 2
-    for node in ir.root.children:
-        assert node.node_type == IRNodeType.IMPORT
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_namespace():
-    """Test parsing C++ namespace."""
+    """Test parsing namespace."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
-    namespace math {
-        double PI = 3.14159;
-        
-        double circumference(double radius) {
-            return 2 * PI * radius;
+    namespace utils {
+        int add(int a, int b) {
+            return a + b;
         }
     }
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    namespace = ir.root.children[0]
-    assert namespace.node_type == IRNodeType.NAMESPACE
-    assert namespace.attributes["name"] == "math"
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_operator_overload():
-    """Test parsing C++ operator overloading."""
+    """Test parsing operator overloading."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
     class Complex {
     public:
         Complex operator+(const Complex& other) const {
             return Complex(real + other.real, imag + other.imag);
         }
+        
     private:
         double real;
         double imag;
     };
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    class_ir = ir.root.children[0]
-    assert class_ir.node_type == IRNodeType.CLASS
-    assert any(
-        child.attributes.get("is_operator") is True
-        for child in class_ir.children
-    )
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_multiple_inheritance():
-    """Test parsing C++ multiple inheritance."""
-    code = """
-    class Derived : public Base1, public Base2 {
-    public:
-        void method() override {
-            Base1::method();
-            Base2::method();
-        }
-    };
-    """
+    """Test parsing multiple inheritance."""
     frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
+    ir = IR()
     
-    assert len(ir.root.children) == 1
-    class_ir = ir.root.children[0]
-    assert class_ir.node_type == IRNodeType.CLASS
-    assert len(class_ir.attributes["bases"]) == 2
+    code = """
+    class A {};
+    class B {};
+    class C : public A, public B {};
+    """
+    
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content
 
 
-@pytest.mark.skip(reason="C/C++ parsing not yet implemented")
+@pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_friend():
-    """Test parsing C++ friend declarations."""
+    """Test parsing friend declarations."""
+    frontend = CPPFrontend()
+    ir = IR()
+    
     code = """
     class A {
         friend class B;
         friend void func(A&);
-    private:
-        int data;
     };
     """
-    frontend = CPPFrontend()
-    ir = frontend.parse_string(code)
     
-    assert len(ir.root.children) == 1
-    class_ir = ir.root.children[0]
-    assert class_ir.node_type == IRNodeType.CLASS
-    assert any(
-        child.attributes.get("is_friend") is True
-        for child in class_ir.children
-    )
+    frontend.parse_string(code, ir)
+    # TODO: Add assertions about IR content

@@ -64,8 +64,8 @@ class IRNode:
         self.node_type = node_type
         self.position = position
         self.attributes = attributes or {}
-        self.children: List[IRNode] = []
-        self.parent: Optional[IRNode] = None
+        self.children: List['IRNode'] = []
+        self.parent: Optional['IRNode'] = None
     
     def add_child(self, child: 'IRNode') -> None:
         """Add a child node."""
@@ -130,6 +130,16 @@ class IR:
         self.symbol_table: Dict[str, Any] = {}
         self.type_information: Dict[str, Any] = {}
         self.dependencies: Set[str] = set()
+    
+    def add_function(self, function_name: str, position: Optional[Position] = None) -> None:
+        """Add a function to the IR."""
+        function_node = IRNode(
+            node_type=IRNodeType.FUNCTION,
+            position=position,
+            attributes={'name': function_name}
+        )
+        self.root.add_child(function_node)
+        self.symbol_table[function_name] = function_node
     
     def clear(self) -> None:
         """Clear the IR."""
