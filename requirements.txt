@@ -1,26 +1,16 @@
-# Core Dependencies
-tree-sitter>=0.20.1    # For parsing multiple languages
-networkx>=3.1          # For graph-based analysis
-numpy>=1.24.0          # For numerical computations
-openai>=1.0.0          # For LLM integration
+# Core dependencies
+pytest>=8.0.0
+pytest-cov>=6.0.0
 
-# Development Dependencies
-pytest>=7.0.0          # Testing framework
-pytest-cov>=4.1.0      # Test coverage
-black>=23.0.0          # Code formatting
-isort>=5.12.0         # Import sorting
-mypy>=1.0.0           # Static type checking
-pylint>=2.17.0        # Code linting
+# Language frontends
+tree-sitter>=0.20.0
 
-# Documentation
-sphinx>=7.0.0         # Documentation generation
-sphinx-rtd-theme>=2.0.0  # Documentation theme
+# Optional dependencies
+clang>=14.0.0; platform_system != "Windows"  # LLVM/Clang bindings for C/C++ support
+libclang>=14.0.0; platform_system == "Windows"  # Windows-specific LLVM/Clang bindings
 
-# Optional Dependencies
-jupyter>=1.0.0        # For interactive development and demos
-graphviz>=0.20.1      # For visualization (requires system graphviz)
-
-# Language Support
-# Note: Additional setup required for tree-sitter grammars
-tree-sitter-python>=0.20.1  # Python language support
-tree-sitter-javascript>=0.20.1  # JavaScript/TypeScript support
+# Development dependencies
+black>=24.0.0  # Code formatting
+isort>=5.13.0  # Import sorting
+flake8>=7.0.0  # Code linting
+mypy>=1.8.0  # Type checking
