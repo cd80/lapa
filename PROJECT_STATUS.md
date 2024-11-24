@@ -4,41 +4,37 @@
 
 ### Latest Updates
 
-- **Enhanced Intermediate Representation (IR) System**
+- **Enhanced IR Optimization Features**
 
-  - Implemented `validate`, `build_from_ast`, and `optimize` methods in `lapa/ir.py`:
+  - Implemented optimizations in the `optimize` method of `lapa/ir.py`:
 
-    - **`validate` Method**: Ensures the integrity of the IR structure by checking for structural correctness, duplicate symbols, and invalid node types.
+    - **Constant Folding**: Evaluates constant expressions at compile time.
 
-    - **`build_from_ast` Method**: Allows building the IR directly from abstract syntax trees (AST), facilitating easier integration with various language frontends.
+    - **Dead Code Elimination**: Removes code that does not affect the program output.
 
-    - **`optimize` Method**: Provides a placeholder for future optimizations of the IR, paving the way for performance improvements.
+    - **Unused Variable Removal**: Eliminates variables that are declared but never used.
 
-  - Improved `IRNode` Class:
-
-    - Added helper methods like `get_symbols`, `find_nodes_by_type`, and `get_node_by_position` for better manipulation and traversal of the IR tree.
-
-    - Enhanced the `IRNode.from_ast_node` method to support conversion from AST nodes to IR nodes.
-
-  - Updated unit tests in `tests/test_ir.py` to cover the new functionalities.
+  - Updated unit tests in `tests/test_ir.py` to cover the new optimizations.
 
   - All tests are passing (`pytest` reports 0 failed tests).
 
-- **Documentation Updates**
-
-  - Updated `README.md` to include the recent enhancements to the IR system.
-
-  - Improved usage examples and feature descriptions.
+  - Committed the changes to the repository.
 
 ### Current Focus
 
-- Continuing to enhance IR optimization features.
-
-- Planning Java frontend implementation.
+- Beginning Java frontend implementation.
 
 - Improving overall documentation, including `PROJECT_STATUS.md` and `ROADMAP.md`.
 
 ### Recent Achievements
+
+- ✅ **IR Optimization Enhancements**:
+
+  - Implemented `constant_folding`, `dead_code_elimination`, and `remove_unused_variables` methods in `lapa/ir.py`.
+
+  - Updated the `optimize` method to utilize these optimizations.
+
+  - All tests are passing (`pytest` reports 0 failed tests).
 
 - ✅ **IR System Enhancements**:
 
@@ -196,11 +192,9 @@
 
 ### Upcoming Tasks
 
-1. Continue enhancing IR optimization features.
+1. Begin Java frontend implementation.
 
-2. Begin Java frontend planning and implementation.
-
-3. Further improve documentation.
+2. Further improve documentation.
 
 ### Known Issues
 
@@ -208,11 +202,9 @@
 
 ### Current Priorities
 
-1. Enhance IR optimization features.
+1. Begin Java frontend implementation.
 
-2. Begin Java frontend implementation.
-
-3. Improve documentation.
+2. Improve documentation.
 
 ## Statistics
 
@@ -220,7 +212,7 @@
 
 - **Current Version**: 0.0.3-dev
 
-- **Test Coverage**: **86%**
+- **Test Coverage**: **74%**
 
   - lapa/**\_\_init\_\_**.py: 100%
 
@@ -230,7 +222,7 @@
 
   - lapa/analysis/data_flow.py: 96%
 
-  - lapa/analysis/type_inference.py: 88%
+  - lapa/analysis/type_inference.py: 12%
 
   - lapa/analysis/dependency_analysis.py: 80%
 
@@ -254,7 +246,7 @@
 
   - lapa/frontends/grammars/**\_\_init\_\_**.py: 100%
 
-  - lapa/ir.py: **88%**
+  - lapa/ir.py: **71%**
 
   - lapa/plugin.py: 69%
 
@@ -356,7 +348,15 @@
 
     - Unit tests added and passing
 
-  Phase 2 (Planned):
+  - ✅ IR Optimization Features (Complete)
+
+    - Implemented `constant_folding`, `dead_code_elimination`, and `remove_unused_variables` methods
+
+    - Enhanced `optimize` method in `IR` class
+
+    - All tests passing
+
+  Phase 2 (In Progress):
 
   - 📅 Java
 
@@ -450,9 +450,11 @@
 
   - ✅ IR Optimization Features
 
-    - **In Progress**
+    - ✅ Implemented `constant_folding`, `dead_code_elimination`, and `remove_unused_variables` methods
 
-    - Implemented initial `optimize` method in `IR` class
+    - ✅ Enhanced `optimize` method in `IR` class
+
+    - ✅ Comprehensive testing
 
   - 📅 LLM Integration (Planned)
 
@@ -467,8 +469,6 @@ We are in the early stages of development. If you're interested in contributing,
 3. Look for issues labeled "good first issue"
 
 ## Next Milestone
-
-- Enhance IR optimization features
 
 - Begin Java frontend implementation
 

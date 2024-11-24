@@ -30,6 +30,7 @@ class LanguageFeature(Enum):
     NAMESPACES = auto()
     MODULES = auto()
     PACKAGES = auto()
+    IMPORTS = auto()
 
     # Memory management
     POINTERS = auto()
@@ -53,6 +54,7 @@ class LanguageFeature(Enum):
     CONDITIONAL_COMPILATION = auto()
     CONCURRENCY = auto()
     CLOSURES = auto()
+    LAMBDA_FUNCTIONS = auto()
 
     # Language-specific
     PREPROCESSOR = auto()
@@ -65,7 +67,6 @@ class LanguageFeature(Enum):
     MOVE_SEMANTICS = auto()
     VARIADIC_TEMPLATES = auto()
     TYPE_INFERENCE = auto()
-    LAMBDA_FUNCTIONS = auto()
     CONCEPTS = auto()
     RANGES = auto()
     CONSTEXPR = auto()
@@ -74,10 +75,10 @@ class LanguageFeature(Enum):
     FOLD_EXPRESSIONS = auto()
     DESIGNATED_INITIALIZERS = auto()
     THREE_WAY_COMPARISON = auto()
+    ANNOTATIONS = auto()
 
     # Decorators and annotations
     DECORATORS = auto()
-    ANNOTATIONS = auto()
 
     # Metaprogramming
     REFLECTION = auto()
@@ -211,5 +212,5 @@ class FrontendRegistry:
         extensions = set()
         for frontend_class in cls._frontends.values():
             frontend = frontend_class()
-            extensions.update(frontend.file_extensions)
+            extensions.update(frontend.get_file_extensions())
         return extensions
