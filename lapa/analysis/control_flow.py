@@ -55,13 +55,13 @@ class ControlFlowAnalyzer:
         """
         for function_node in self._get_function_nodes(ir.root):
             cfg = self._build_cfg(function_node)
-            function_name = function_node.attributes.get("name", "anonymous")
+            function_name = function_node.name or "anonymous"
             self.cfgs[function_name] = cfg
 
     def _get_function_nodes(self, node: IRNode) -> List[IRNode]:
         """Recursively gather all function nodes in the IR."""
         function_nodes = []
-        if node.node_type == IRNodeType.FUNCTION_DEF:
+        if node.node_type in {IRNodeType.FUNCTION_DEF, IRNodeType.FUNCTION}:
             function_nodes.append(node)
         for child in node.children:
             function_nodes.extend(self._get_function_nodes(child))
@@ -69,163 +69,108 @@ class ControlFlowAnalyzer:
 
     def _build_cfg(self, function_node: IRNode) -> ControlFlowGraph:
         """Build a control flow graph for a given function node."""
-        function_name = function_node.attributes.get("name", "anonymous")
+        function_name = function_node.name or "anonymous"
         cfg = ControlFlowGraph(function_name)
         current_block = cfg.entry_block
 
-        body = function_node.attributes.get("body")
-        if body:
-            current_block = self._process_node_list(body.children, current_block, cfg)
+        # Process the function body directly from the function node's children
+        current_block = self._process_node_list(function_node.children, current_block, cfg)
         current_block.add_successor(cfg.exit_block)
 
         return cfg
 
     def _process_node(self, node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph) -> BasicBlock:
         """Process an IR node and update the CFG accordingly."""
-        if node.node_type == IRNodeType.CONDITIONAL:
-            # Handle conditionals (if-else)
-            condition = node.attributes.get("condition")
+        if node.node_type == IRNodeType.CONTROL_FLOW:
+            control_type = node.attributes.get("type")
+            if control_type in {"if", "if_else"}:
+                # Handle if-else control flow
+                condition = node.attributes.get("condition")
 
-            # Create blocks
-            block_id = cfg.block_counter
-            if_block = BasicBlock(f"if_block_{block_id}")
-            cfg.block_counter += 1
-            else_block = BasicBlock(f"else_block_{cfg.block_counter}")
-            cfg.block_counter += 1
-            end_block = BasicBlock(f"end_if_block_{cfg.block_counter}")
-            cfg.block_counter += 1
+                # Create blocks with appropriate block IDs
+                if_block_id = cfg.block_counter
+                if_block = BasicBlock(f"if_block_{if_block_id}")
+                cfg.block_counter += 1
 
-            # Add blocks to CFG
-            cfg.blocks[if_block.name] = if_block
-            cfg.blocks[else_block.name] = else_block
-            cfg.blocks[end_block.name] = end_block
+                else_block_id = cfg.block_counter
+                else_block = BasicBlock(f"else_block_{else_block_id}")
+                cfg.block_counter += 1
 
-            # Connect current block to condition evaluation
-            current_block.add_statement(condition)
-            current_block.add_successor(if_block)
-            current_block.add_successor(else_block)
+                end_block_id = cfg.block_counter
+                end_block = BasicBlock(f"end_block_{end_block_id}")
+                cfg.block_counter += 1
 
-            # Process the 'true' branch
-            true_branch = node.attributes.get("true_branch")
-            if true_branch:
-                new_block_if = self._process_node_list(true_branch.children, if_block, cfg)
-                new_block_if.add_successor(end_block)
+                # Add blocks to CFG
+                cfg.blocks[if_block.name] = if_block
+                cfg.blocks[else_block.name] = else_block
+                cfg.blocks[end_block.name] = end_block
+
+                # Connect current block to condition evaluation
+                if condition:
+                    current_block.add_statement(condition)
+                current_block.add_successor(if_block)
+                current_block.add_successor(else_block)
+
+                # Process the 'if' branch
+                if_children = node.children[0].children if node.children else []
+                new_if_block = self._process_node_list(if_children, if_block, cfg)
+                new_if_block.add_successor(end_block)
+
+                # Process the 'else' branch
+                else_children = node.children[1].children if len(node.children) > 1 else []
+                if else_children:
+                    new_else_block = self._process_node_list(else_children, else_block, cfg)
+                    new_else_block.add_successor(end_block)
+                else:
+                    else_block.add_successor(end_block)
+
+                # Continue from the end block
+                current_block = end_block
+
             else:
-                if_block.add_successor(end_block)
-
-            # Process the 'false' branch
-            false_branch = node.attributes.get("false_branch")
-            if false_branch:
-                new_block_else = self._process_node_list(false_branch.children, else_block, cfg)
-                new_block_else.add_successor(end_block)
-            else:
-                else_block.add_successor(end_block)
-
-            # Continue from the end block
-            current_block = end_block
+                # Unknown control flow type; treat as normal statements
+                current_block.add_statement(node)
+                current_block = self._process_node_list(node.children, current_block, cfg)
 
         elif node.node_type == IRNodeType.LOOP:
             # Handle loops
-            block_id = cfg.block_counter
-            loop_condition_block = BasicBlock(f"loop_condition_block_{block_id}")
+            loop_block_id = cfg.block_counter
+            loop_block = BasicBlock(f"loop_block_{loop_block_id}")
             cfg.block_counter += 1
-            loop_body_block = BasicBlock(f"loop_body_block_{cfg.block_counter}")
-            cfg.block_counter += 1
-            loop_end_block = BasicBlock(f"loop_end_block_{cfg.block_counter}")
+
+            after_loop_block_id = cfg.block_counter
+            after_loop_block = BasicBlock(f"after_loop_block_{after_loop_block_id}")
             cfg.block_counter += 1
 
             # Add blocks to CFG
-            cfg.blocks[loop_condition_block.name] = loop_condition_block
-            cfg.blocks[loop_body_block.name] = loop_body_block
-            cfg.blocks[loop_end_block.name] = loop_end_block
+            cfg.blocks[loop_block.name] = loop_block
+            cfg.blocks[after_loop_block.name] = after_loop_block
 
-            # Connect current block to loop condition
-            current_block.add_successor(loop_condition_block)
+            # Connect current block to loop block
+            current_block.add_successor(loop_block)
 
-            # Process loop condition
+            # Process loop condition if present
             condition = node.attributes.get("condition")
-            loop_condition_block.add_statement(condition)
-            loop_condition_block.add_successor(loop_body_block)
-            loop_condition_block.add_successor(loop_end_block)
+            if condition:
+                loop_block.add_statement(condition)
 
             # Process loop body
-            body = node.attributes.get("body")
-            if body:
-                new_loop_body_block = self._process_node_list(body.children, loop_body_block, cfg)
-                new_loop_body_block.add_successor(loop_condition_block)
-            else:
-                loop_body_block.add_successor(loop_condition_block)
+            loop_body = node.children
+            new_loop_block = self._process_node_list(loop_body, loop_block, cfg)
 
-            # Continue from loop end block
-            current_block = loop_end_block
+            # Loop back to the loop block
+            new_loop_block.add_successor(loop_block)
 
-        elif node.node_type == IRNodeType.TRY_EXCEPT:
-            # Handle try-except-finally blocks
-            block_id = cfg.block_counter
-            try_block = BasicBlock(f"try_block_{block_id}")
-            cfg.block_counter += 1
-            end_try_block = BasicBlock(f"end_try_block_{cfg.block_counter}")
-            cfg.block_counter += 1
+            # Exit loop to after_loop_block
+            loop_block.add_successor(after_loop_block)
 
-            # Add blocks to CFG
-            cfg.blocks[try_block.name] = try_block
-            cfg.blocks[end_try_block.name] = end_try_block
-
-            # Connect current block to try block
-            current_block.add_successor(try_block)
-
-            # Process try block
-            try_body = node.attributes.get("try_body")
-            if try_body:
-                new_try_block = self._process_node_list(try_body.children, try_block, cfg)
-            else:
-                new_try_block = try_block
-            new_try_block.add_successor(end_try_block)
-
-            # Process except blocks
-            except_blocks = node.attributes.get("except_blocks", [])
-            except_end_blocks = []
-            for except_node in except_blocks:
-                except_block_id = cfg.block_counter
-                except_block = BasicBlock(f"except_block_{except_block_id}")
-                cfg.block_counter += 1
-                cfg.blocks[except_block.name] = except_block
-
-                # Connect from try block to except block
-                try_block.add_successor(except_block)
-
-                # Process except block
-                except_body = except_node.attributes.get("body")
-                if except_body:
-                    new_except_block = self._process_node_list(except_body.children, except_block, cfg)
-                else:
-                    new_except_block = except_block
-
-                # Connect except block to end_try_block
-                new_except_block.add_successor(end_try_block)
-                except_end_blocks.append(new_except_block)
-
-            # Process finally block if present
-            finally_body = node.attributes.get("finally_body")
-            if finally_body:
-                finally_block = BasicBlock(f"finally_block_{cfg.block_counter}")
-                cfg.block_counter += 1
-                cfg.blocks[finally_block.name] = finally_block
-
-                # Connect end_try_block to finally_block
-                end_try_block.add_successor(finally_block)
-
-                # Process finally block
-                new_finally_block = self._process_node_list(finally_body.children, finally_block, cfg)
-                current_block = new_finally_block
-            else:
-                current_block = end_try_block
+            # Continue from after_loop_block
+            current_block = after_loop_block
 
         else:
             # Process normal statements
             current_block.add_statement(node)
-            for child in node.children:
-                current_block = self._process_node(child, current_block, cfg)
+            current_block = self._process_node_list(node.children, current_block, cfg)
 
         return current_block
 

@@ -7,7 +7,7 @@ the framework for representing and manipulating program structures.
 
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Set
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from collections import Counter
 
 
@@ -16,6 +16,7 @@ class IRNodeType(Enum):
     PROGRAM = auto()
     FUNCTION_DEF = auto()
     FUNCTION = auto()
+    CLASS_DEF = auto()
     CLASS = auto()
     METHOD = auto()
     VARIABLE = auto()
@@ -42,6 +43,8 @@ class IRNodeType(Enum):
     BLOCK = auto()
     BINARY_OPERATION = auto()
     CONDITIONAL = auto()
+    TRY_EXCEPT = auto()
+    COLLECTION = auto()  # Added
     # Additional node types
     STRUCT = auto()
     ENUM = auto()
@@ -113,6 +116,7 @@ class IRNode:
         if self.node_type in {
             IRNodeType.FUNCTION_DEF,
             IRNodeType.FUNCTION,
+            IRNodeType.CLASS_DEF,
             IRNodeType.CLASS,
             IRNodeType.VARIABLE,
             IRNodeType.STRUCT,
@@ -184,12 +188,13 @@ class IRNode:
         # Placeholder implementation; actual implementation depends on AST structure
         node_type_mapping = {
             'FunctionDef': IRNodeType.FUNCTION_DEF,
-            'ClassDef': IRNodeType.CLASS,
+            'ClassDef': IRNodeType.CLASS_DEF,
             'Assign': IRNodeType.ASSIGNMENT,
             'Call': IRNodeType.FUNCTION_CALL,
             'If': IRNodeType.CONDITIONAL,
             'For': IRNodeType.LOOP,
             'While': IRNodeType.LOOP,
+            'Try': IRNodeType.TRY_EXCEPT,
             'Return': IRNodeType.RETURN,
             'Import': IRNodeType.IMPORT,
             # Add more mappings as needed
@@ -231,7 +236,7 @@ class Function(IRNode):
         position: Optional[Position] = None,
     ):
         super().__init__(
-            node_type=IRNodeType.FUNCTION,
+            node_type=IRNodeType.FUNCTION_DEF,
             name=name,
             position=position,
             attributes={"return_type": return_type, "parameters": parameters},
@@ -415,6 +420,7 @@ class IR:
             if not isinstance(node.node_type, IRNodeType):
                 errors.append(f"Invalid node type at {node}")
             if node.node_type in {
+                IRNodeType.CLASS_DEF,
                 IRNodeType.CLASS,
                 IRNodeType.FUNCTION,
                 IRNodeType.FUNCTION_DEF,
@@ -540,9 +546,10 @@ class IR:
 
         def collect_symbols(node: IRNode):
             if node.node_type in {
-                IRNodeType.FUNCTION_DEF,
-                IRNodeType.FUNCTION,
+                IRNodeType.CLASS_DEF,
                 IRNodeType.CLASS,
+                IRNodeType.FUNCTION,
+                IRNodeType.FUNCTION_DEF,
                 IRNodeType.VARIABLE,
                 IRNodeType.STRUCT,
                 IRNodeType.ENUM,
