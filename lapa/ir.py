@@ -6,17 +6,19 @@ the framework for representing and manipulating program structures.
 """
 
 from enum import Enum, auto
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set
 from dataclasses import dataclass
 
 
 class IRNodeType(Enum):
     """Types of IR nodes."""
     PROGRAM = auto()
+    FUNCTION_DEF = auto()  # Added FUNCTION_DEF
     FUNCTION = auto()
     CLASS = auto()
     METHOD = auto()
     VARIABLE = auto()
+    LITERAL = auto()
     FIELD = auto()
     NAMESPACE = auto()
     CONSTRUCTOR = auto()
@@ -29,14 +31,17 @@ class IRNodeType(Enum):
     MODULE = auto()
     PACKAGE = auto()
     RETURN = auto()
-    ASSIGNMENT = auto()
+    ASSIGNMENT = auto()          # Added ASSIGNMENT
     CONTROL_FLOW = auto()
-    LOOP = auto()
+    LOOP = auto()                # Already present
     CALL = auto()
+    FUNCTION_CALL = auto()       # Added FUNCTION_CALL
     OPERATOR = auto()
-    NO_OP = auto()  # Added NO_OP node type
-    BLOCK = auto()  # Added BLOCK node type
-    # Added new node types
+    NO_OP = auto()               # Already present
+    BLOCK = auto()               # Already present
+    BINARY_OPERATION = auto()    # Added BINARY_OPERATION
+    CONDITIONAL = auto()         # Added CONDITIONAL
+    # Additional node types
     STRUCT = auto()
     ENUM = auto()
     TRAIT = auto()
@@ -156,7 +161,7 @@ class Function(IRNode):
             node_type=IRNodeType.FUNCTION,
             name=name,
             position=position,
-            attributes={"return_type": return_type},
+            attributes={"return_type": return_type, "parameters": parameters},
         )
         self.parameters = parameters or []
         self.return_type = return_type
@@ -240,10 +245,17 @@ class Variable(IRNode):
         var_type: Optional[str] = None,
         ownership: Optional[OwnershipInfo] = None,
         position: Optional[Position] = None,
+        definition: Optional[IRNode] = None,
     ):
-        super().__init__(node_type=IRNodeType.VARIABLE, name=name, position=position)
+        super().__init__(
+            node_type=IRNodeType.VARIABLE,
+            name=name,
+            position=position,
+            attributes={"type": var_type, "ownership": ownership, "definition": definition},
+        )
         self.var_type = var_type
         self.ownership = ownership
+        self.definition = definition
 
 
 class IR:
