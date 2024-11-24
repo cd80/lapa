@@ -1,7 +1,7 @@
 """
 Control Flow Analysis module.
 
-This module provides functionality to build a control flow graph (CFG) from the IR.
+This module provides functionality to build a control flow graph (CFG) from the IR, including handling of exception constructs.
 """
 
 from typing import Dict, Set, List
@@ -104,6 +104,9 @@ class ControlFlowAnalyzer:
                     else:
                         current_block = self._process_if_node(node, current_block, cfg)
                         i += 1
+                elif control_type == "try":
+                    current_block = self._process_try_except_node(node, current_block, cfg)
+                    i += 1
                 else:
                     # Unknown CONTROL_FLOW type; process as normal
                     current_block.add_statement(node)
@@ -218,13 +221,85 @@ class ControlFlowAnalyzer:
 
         # Loop header decision
         loop_header.add_successor(after_loop_block)  # False branch exits loop
-        loop_header.add_successor(loop_header)       # True branch continues loop
 
         # Process loop body
-        loop_body_block = loop_header
-        new_loop_block = self._process_node_list(loop_node.children, loop_body_block, cfg)
+        new_loop_block = self._process_node_list(loop_node.children, loop_header, cfg)
+
         # Loop back to loop header
         new_loop_block.add_successor(loop_header)
 
         # Continue from after loop block
         return after_loop_block
+
+    def _process_try_except_node(
+        self, try_node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph
+    ) -> BasicBlock:
+        """Process a 'try-except-finally' node."""
+        # Create try block
+        try_block_name = f"try_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        try_block = BasicBlock(try_block_name)
+        cfg.blocks[try_block_name] = try_block
+
+        # Create end block
+        end_block_name = f"end_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        end_block = BasicBlock(end_block_name)
+        end_block.is_join_point = True
+        cfg.blocks[end_block_name] = end_block
+
+        # Connect current block to try block
+        current_block.add_successor(try_block)
+
+        # Process try block
+        new_try_block = self._process_node_list(try_node.children, try_block, cfg)
+
+        # Collect 'except' and 'finally' nodes
+        except_nodes = [child for child in try_node.children if child.attributes.get("type") == "except"]
+        finally_node = next((child for child in try_node.children if child.attributes.get("type") == "finally"), None)
+
+        # Process 'except' blocks
+        prev_except_blocks = []
+        for except_node in except_nodes:
+            except_block_name = f"except_block_{cfg.block_counter}"
+            cfg.block_counter += 1
+            except_block = BasicBlock(except_block_name)
+            cfg.blocks[except_block_name] = except_block
+
+            # Connect try block to except block
+            try_block.add_successor(except_block)
+
+            # Process except block
+            new_except_block = self._process_node_list(except_node.children, except_block, cfg)
+            prev_except_blocks.append(new_except_block)
+
+        # If there are no except blocks, assume exceptions propagate
+        if not except_nodes:
+            # Exceptions propagate; connect try block to end block
+            try_block.add_successor(end_block)
+
+        # Process 'finally' block if present
+        if finally_node:
+            finally_block_name = f"finally_block_{cfg.block_counter}"
+            cfg.block_counter += 1
+            finally_block = BasicBlock(finally_block_name)
+            cfg.blocks[finally_block_name] = finally_block
+
+            # Process finally block
+            new_finally_block = self._process_node_list(finally_node.children, finally_block, cfg)
+
+            # Connect try block and except blocks to finally block
+            new_try_block.add_successor(finally_block)
+            for except_block in prev_except_blocks:
+                except_block.add_successor(finally_block)
+
+            # Connect finally block to end block
+            new_finally_block.add_successor(end_block)
+        else:
+            # No finally block; connect try and except blocks directly to end block
+            new_try_block.add_successor(end_block)
+            for except_block in prev_except_blocks:
+                except_block.add_successor(end_block)
+
+        # Continue from end block
+        return end_block

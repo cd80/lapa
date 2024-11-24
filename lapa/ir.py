@@ -60,6 +60,7 @@ class IRNodeType(Enum):
     IMPORT_FROM = auto()
     ARRAY_ACCESS = auto()  # Added for array/collection access analysis
     PHI = auto()  # Added for SSA form phi nodes
+    STATEMENT = auto()  # Added STATEMENT node type
 
 
 @dataclass
@@ -475,7 +476,7 @@ class IR:
         def fold_constants(node: IRNode):
             for child in node.children:
                 fold_constants(child)
-            if node.node_type == IRNodeType.BINARY_OP:  # Updated to use BINARY_OP
+            if node.node_type == IRNodeType.BINARY_OP:
                 left = node.children[0]
                 right = node.children[1]
                 if left.node_type == IRNodeType.LITERAL and right.node_type == IRNodeType.LITERAL:
