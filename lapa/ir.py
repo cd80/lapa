@@ -41,16 +41,23 @@ class IRNodeType(Enum):
     OPERATOR = auto()
     NO_OP = auto()
     BLOCK = auto()
-    BINARY_OPERATION = auto()
+    BINARY_OP = auto()  # Changed from BINARY_OPERATION
+    UNARY_OP = auto()  # Added
     CONDITIONAL = auto()
-    TRY_EXCEPT = auto()
-    COLLECTION = auto()  # Added
-    # Additional node types
+    TRY = auto()  # Changed from TRY_EXCEPT
+    EXCEPT_HANDLER = auto()  # Added
+    COLLECTION = auto()
     STRUCT = auto()
     ENUM = auto()
     TRAIT = auto()
     MACRO = auto()
     IMPLEMENTATION = auto()
+    TYPE = auto()  # Added
+    ALIAS = auto()  # Added
+    WHILE = auto()  # Added
+    FOR = auto()  # Added
+    IF = auto()  # Added
+    IMPORT_FROM = auto()  # Added
 
 
 @dataclass
@@ -191,10 +198,10 @@ class IRNode:
             'ClassDef': IRNodeType.CLASS_DEF,
             'Assign': IRNodeType.ASSIGNMENT,
             'Call': IRNodeType.FUNCTION_CALL,
-            'If': IRNodeType.CONDITIONAL,
-            'For': IRNodeType.LOOP,
-            'While': IRNodeType.LOOP,
-            'Try': IRNodeType.TRY_EXCEPT,
+            'If': IRNodeType.IF,
+            'For': IRNodeType.FOR,
+            'While': IRNodeType.WHILE,
+            'Try': IRNodeType.TRY,
             'Return': IRNodeType.RETURN,
             'Import': IRNodeType.IMPORT,
             # Add more mappings as needed
@@ -466,7 +473,7 @@ class IR:
         def fold_constants(node: IRNode):
             for child in node.children:
                 fold_constants(child)
-            if node.node_type == IRNodeType.BINARY_OPERATION:
+            if node.node_type == IRNodeType.BINARY_OP:  # Updated to use BINARY_OP
                 left = node.children[0]
                 right = node.children[1]
                 if left.node_type == IRNodeType.LITERAL and right.node_type == IRNodeType.LITERAL:
