@@ -37,7 +37,7 @@ class TypeInferenceAnalyzer:
         for child in node.children:
             self.traverse(child)
 
-    def infer_type(self, node: IRNode) -> Optional[Any]:
+    def infer_type(self, node: Optional[IRNode]) -> Optional[Any]:
         """
         Infer the type of a given IR node.
 
@@ -47,6 +47,10 @@ class TypeInferenceAnalyzer:
         Returns:
             The inferred type of the node, or None if not applicable.
         """
+        # Handle None nodes
+        if node is None:
+            return None
+
         # Skip PROGRAM nodes as they do not represent a value with a type
         if node.node_type == IRNodeType.PROGRAM:
             return None
@@ -117,14 +121,14 @@ class TypeInferenceAnalyzer:
         """Infer type for a literal node."""
         # Assume node.attributes['value'] contains the literal value
         value = node.attributes.get('value')
-        if isinstance(value, int):
+        if isinstance(value, bool):  # Check for bool first since bool is a subclass of int
+            return 'bool'
+        elif isinstance(value, int):
             return 'int'
         elif isinstance(value, float):
             return 'float'
         elif isinstance(value, str):
             return 'str'
-        elif isinstance(value, bool):
-            return 'bool'
         else:
             return 'unknown'
 
@@ -168,13 +172,12 @@ class TypeInferenceAnalyzer:
 
     def infer_function_call_type(self, node: IRNode) -> Any:
         """Infer type for a function call node."""
-        # Assume we can get the function definition from node.attributes['function']
+        # Get the function definition from node.attributes['function']
         function_def = node.attributes.get('function')
         if function_def:
-            return_type = self.infer_type(function_def)
-            return return_type
-        else:
-            return 'unknown'
+            # Return the function's return type directly if available
+            return function_def.attributes.get('return_type', 'unknown')
+        return 'unknown'
 
     def infer_function_def_type(self, node: IRNode) -> Any:
         """Infer return type for a function definition."""
@@ -182,9 +185,10 @@ class TypeInferenceAnalyzer:
         parameters = node.attributes.get('parameters', [])
         for param in parameters:
             self.infer_type(param)
-        # Infer type of the function body
+        # Infer type of the function body if it exists
         body = node.attributes.get('body')
-        self.infer_type(body)
+        if body is not None:
+            self.infer_type(body)
         # Get the return type if specified
         return_type = node.attributes.get('return_type', 'void')
         self.type_information[node] = return_type
