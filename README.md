@@ -15,6 +15,7 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
 - **Type Inference Analyzer**: Infer types of variables and expressions in code without explicit type annotations.
 - **Dependency Analyzer**: Analyze dependencies between functions, variables, and modules to understand code relationships.
 - **Plugin Architecture**: Extend the framework with custom analysis plugins.
+- **Comprehensive Testing**: Improved test coverage across modules, ensuring robust and reliable functionality.
 
 ## Supported Languages
 
@@ -38,6 +39,18 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
   - Tree-sitter integration completed
   - AST to IR conversion implemented
   - Support for classes, interfaces, enums, annotations, etc.
+- **Swift** (Planned)
+  - Frontend structure
+  - Swift compiler integration
+  - AST to IR conversion
+  - iOS/macOS framework support
+
+## Current Status
+
+- **Phase 2: Extended Language Support**
+  - Recent improvements include fixes and comprehensive tests for the `TypeInferenceAnalyzer`.
+  - Test coverage has been significantly improved, ensuring robust functionality.
+  - Next steps include implementing the Swift frontend and further enhancing documentation.
 
 ## Installation
 
