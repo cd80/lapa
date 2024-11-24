@@ -7,7 +7,7 @@ the framework for representing and manipulating program structures.
 
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Set
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections import Counter
 
 
@@ -445,14 +445,77 @@ class IR:
         ir_node = IRNode.from_ast_node(ast)
         self.root.add_child(ir_node)
         # Update symbol table and other structures
-        self.symbol_table.update({name: node for name, node in zip(self.root.get_symbols(), self.root.children)})
+        self.symbol_table.update(self.get_symbols())
         self.type_information.update(self.get_types())
         self.dependencies.update(self.get_dependencies())
 
     def optimize(self) -> None:
         """Optimize the IR."""
-        # Placeholder for optimization logic
-        pass
+        self.constant_folding()
+        self.dead_code_elimination()
+        self.remove_unused_variables()
+
+    def constant_folding(self) -> None:
+        """Perform constant folding optimization."""
+        def fold_constants(node: IRNode):
+            for child in node.children:
+                fold_constants(child)
+            if node.node_type == IRNodeType.BINARY_OPERATION:
+                left = node.children[0]
+                right = node.children[1]
+                if left.node_type == IRNodeType.LITERAL and right.node_type == IRNodeType.LITERAL:
+                    op = node.attributes.get('operator')
+                    if op and isinstance(left.attributes.get('value'), (int, float)) and isinstance(right.attributes.get('value'), (int, float)):
+                        result = None
+                        if op == '+':
+                            result = left.attributes['value'] + right.attributes['value']
+                        elif op == '-':
+                            result = left.attributes['value'] - right.attributes['value']
+                        elif op == '*':
+                            result = left.attributes['value'] * right.attributes['value']
+                        elif op == '/':
+                            if right.attributes['value'] != 0:
+                                result = left.attributes['value'] / right.attributes['value']
+                        if result is not None:
+                            node.node_type = IRNodeType.LITERAL
+                            node.attributes = {'value': result}
+                            node.children = []
+
+        fold_constants(self.root)
+
+    def dead_code_elimination(self) -> None:
+        """Perform dead code elimination."""
+        def eliminate_dead_code(node: IRNode):
+            new_children = []
+            for child in node.children:
+                eliminate_dead_code(child)
+                if not (child.node_type == IRNodeType.NO_OP):
+                    new_children.append(child)
+            node.children = new_children
+
+        eliminate_dead_code(self.root)
+
+    def remove_unused_variables(self) -> None:
+        """Remove variables that are declared but never used."""
+        variable_usage = set()
+
+        def collect_variable_usage(node: IRNode):
+            if node.node_type == IRNodeType.VARIABLE and node.name:
+                variable_usage.add(node.name)
+            for child in node.children:
+                collect_variable_usage(child)
+
+        def remove_unused(node: IRNode):
+            new_children = []
+            for child in node.children:
+                if child.node_type == IRNodeType.VARIABLE and child.name not in variable_usage:
+                    continue  # Skip unused variable
+                remove_unused(child)
+                new_children.append(child)
+            node.children = new_children
+
+        collect_variable_usage(self.root)
+        remove_unused(self.root)
 
     def to_dot(self) -> str:
         """Convert to DOT format for visualization."""
@@ -473,8 +536,8 @@ class IR:
 
     def get_symbols(self) -> Dict[str, Any]:
         """Get all symbol names defined in the IR."""
-        # Updating symbol_table with all symbols collected
         symbols = {}
+
         def collect_symbols(node: IRNode):
             if node.node_type in {
                 IRNodeType.FUNCTION_DEF,
@@ -489,6 +552,7 @@ class IR:
                 symbols[node.name] = node
             for child in node.children:
                 collect_symbols(child)
+
         collect_symbols(self.root)
         return symbols
 
