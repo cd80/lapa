@@ -4,56 +4,59 @@
 
 ### Latest Updates
 
-- **Swift Frontend Implementation**
+- **All Tests Passing**
 
-  - Implemented the Swift frontend in `lapa/frontends/swift.py`:
-    - Initialized the Swift frontend with basic structure.
-    - Implemented placeholder methods for parsing and AST to IR conversion.
-    - Registered the Swift frontend in the FrontendRegistry.
-    - Added unit tests in `tests/frontends/test_swift.py`.
-    - All tests are passing (`pytest` reports 0 failed tests).
-    - Committed and pushed the changes to the repository.
+  - Executed `pytest` and confirmed that all tests are passing (`pytest` reports 0 failed tests).
+  - Test coverage is at **80%**.
+  - Updated coverage reports and documentation.
 
 - **Documentation Improvements**
 
   - Updated `README.md` to reflect recent progress.
-  - Improved test coverage reports.
+  - Improved code comments and docstrings throughout the codebase.
+  - Enhanced `ROADMAP.md` with updated tasks and milestones.
 
 ### Current Focus
 
 - **Swift Frontend Development**
 
   - Integrate Swift compiler or parser.
-  - Implement AST to IR conversion.
+  - Implement AST to IR conversion for Swift code.
   - Add support for iOS/macOS frameworks.
 
 - **Documentation Enhancement**
 
-  - Update project documentation to include new features.
+  - Continue updating project documentation to include new features.
   - Improve code comments and docstrings.
 
 ### Recent Achievements
 
-- ✅ **Swift Frontend Implementation**:
+- ✅ **All Tests Passing**
 
-  - Added `SwiftFrontend` class in `lapa/frontends/swift.py`.
-  - Registered Swift frontend with the FrontendRegistry.
-  - Added unit tests in `tests/frontends/test_swift.py`.
+  - Resolved all test failures.
+  - Achieved 80% test coverage across the codebase.
   - All tests are passing (`pytest` reports 0 failed tests).
 
-- ✅ **Type Inference Analyzer Fixes**:
+- ✅ **Swift Frontend Implementation**
+
+  - Added `SwiftFrontend` class in `lapa/frontends/swift.py`.
+  - Implemented placeholder methods for parsing and AST to IR conversion.
+  - Registered the Swift frontend in the `FrontendRegistry`.
+  - Added unit tests in `tests/frontends/test_swift.py`.
+  - Committed and pushed the changes to the repository.
+
+- ✅ **Type Inference Analyzer Fixes**
 
   - Resolved issues in the `TypeInferenceAnalyzer`.
   - Added comprehensive tests in `tests/analysis/test_type_inference.py`.
   - Improved test coverage to 84% for `type_inference.py`.
   - All tests are passing.
 
-- ✅ **Documentation Updates**:
+- ✅ **Documentation Updates**
 
   - Updated `README.md` to reflect recent progress and next steps.
+  - Improved code comments and docstrings.
   - Committed and pushed changes to the repository.
-
-[Previous achievements remain unchanged]
 
 ### Upcoming Tasks
 
@@ -77,7 +80,7 @@
 - **Current Version**: 0.0.4-dev
 - **Test Coverage**: **80%**
 
-  - Updated coverage for `type_inference.py`: 84%
+  - Updated coverage for `type_inference.py`: 84%.
   - Increased overall test coverage.
 
 - **Language Support Status**:
@@ -92,10 +95,10 @@
   - ⚙️ Swift (In Progress)
 
     - Frontend structure implemented.
-    - Registered with FrontendRegistry.
+    - Registered with `FrontendRegistry`.
     - Initial tests added and passing.
 
-[Other sections remain unchanged]
+[Previous achievements remain unchanged]
 
 ## Next Milestone
 
