@@ -204,11 +204,11 @@ class JavaFrontend(Frontend):
             "import_declaration": IRNodeType.IMPORT,
             "lambda_expression": IRNodeType.FUNCTION,  # Lambdas are functions
             "expression_statement": IRNodeType.NO_OP,
-            "if_statement": IRNodeType.CONDITIONAL,
-            "while_statement": IRNodeType.LOOP,
-            "for_statement": IRNodeType.LOOP,
+            "if_statement": IRNodeType.IF,
+            "while_statement": IRNodeType.WHILE,
+            "for_statement": IRNodeType.FOR,
             "return_statement": IRNodeType.RETURN,
-            "binary_expression": IRNodeType.BINARY_OPERATION,
+            "binary_expression": IRNodeType.BINARY_OP,  # Changed from BINARY_OPERATION
             "method_invocation": IRNodeType.FUNCTION_CALL,
             # Add more mappings as needed
         }

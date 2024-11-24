@@ -41,23 +41,25 @@ class IRNodeType(Enum):
     OPERATOR = auto()
     NO_OP = auto()
     BLOCK = auto()
-    BINARY_OP = auto()  # Changed from BINARY_OPERATION
-    UNARY_OP = auto()  # Added
+    BINARY_OP = auto()
+    UNARY_OP = auto()
     CONDITIONAL = auto()
-    TRY = auto()  # Changed from TRY_EXCEPT
-    EXCEPT_HANDLER = auto()  # Added
+    TRY = auto()
+    EXCEPT_HANDLER = auto()
     COLLECTION = auto()
     STRUCT = auto()
     ENUM = auto()
     TRAIT = auto()
     MACRO = auto()
     IMPLEMENTATION = auto()
-    TYPE = auto()  # Added
-    ALIAS = auto()  # Added
-    WHILE = auto()  # Added
-    FOR = auto()  # Added
-    IF = auto()  # Added
-    IMPORT_FROM = auto()  # Added
+    TYPE = auto()
+    ALIAS = auto()
+    WHILE = auto()
+    FOR = auto()
+    IF = auto()
+    IMPORT_FROM = auto()
+    ARRAY_ACCESS = auto()  # Added for array/collection access analysis
+    PHI = auto()  # Added for SSA form phi nodes
 
 
 @dataclass

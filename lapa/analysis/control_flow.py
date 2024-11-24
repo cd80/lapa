@@ -16,6 +16,7 @@ class BasicBlock:
         self.statements: List[IRNode] = []
         self.predecessors: Set['BasicBlock'] = set()
         self.successors: Set['BasicBlock'] = set()
+        self.is_join_point = False  # Flag to mark join points
 
     def add_statement(self, node: IRNode):
         self.statements.append(node)
@@ -69,113 +70,161 @@ class ControlFlowAnalyzer:
 
     def _build_cfg(self, function_node: IRNode) -> ControlFlowGraph:
         """Build a control flow graph for a given function node."""
-        function_name = function_node.name or "anonymous"
-        cfg = ControlFlowGraph(function_name)
+        cfg = ControlFlowGraph(function_node.name or "anonymous")
         current_block = cfg.entry_block
 
-        # Process the function body directly from the function node's children
+        # Process the function body
         current_block = self._process_node_list(function_node.children, current_block, cfg)
         current_block.add_successor(cfg.exit_block)
 
         return cfg
 
-    def _process_node(self, node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph) -> BasicBlock:
-        """Process an IR node and update the CFG accordingly."""
-        if node.node_type == IRNodeType.CONTROL_FLOW:
-            control_type = node.attributes.get("type")
-            if control_type in {"if", "if_else"}:
-                # Handle if-else control flow
-                condition = node.attributes.get("condition")
-
-                # Create blocks with appropriate block IDs
-                if_block_id = cfg.block_counter
-                if_block = BasicBlock(f"if_block_{if_block_id}")
-                cfg.block_counter += 1
-
-                else_block_id = cfg.block_counter
-                else_block = BasicBlock(f"else_block_{else_block_id}")
-                cfg.block_counter += 1
-
-                end_block_id = cfg.block_counter
-                end_block = BasicBlock(f"end_block_{end_block_id}")
-                cfg.block_counter += 1
-
-                # Add blocks to CFG
-                cfg.blocks[if_block.name] = if_block
-                cfg.blocks[else_block.name] = else_block
-                cfg.blocks[end_block.name] = end_block
-
-                # Connect current block to condition evaluation
-                if condition:
-                    current_block.add_statement(condition)
-                current_block.add_successor(if_block)
-                current_block.add_successor(else_block)
-
-                # Process the 'if' branch
-                if_children = node.children[0].children if node.children else []
-                new_if_block = self._process_node_list(if_children, if_block, cfg)
-                new_if_block.add_successor(end_block)
-
-                # Process the 'else' branch
-                else_children = node.children[1].children if len(node.children) > 1 else []
-                if else_children:
-                    new_else_block = self._process_node_list(else_children, else_block, cfg)
-                    new_else_block.add_successor(end_block)
-                else:
-                    else_block.add_successor(end_block)
-
-                # Continue from the end block
-                current_block = end_block
-
-            else:
-                # Unknown control flow type; treat as normal statements
-                current_block.add_statement(node)
-                current_block = self._process_node_list(node.children, current_block, cfg)
-
-        elif node.node_type == IRNodeType.LOOP:
-            # Handle loops
-            loop_block_id = cfg.block_counter
-            loop_block = BasicBlock(f"loop_block_{loop_block_id}")
-            cfg.block_counter += 1
-
-            after_loop_block_id = cfg.block_counter
-            after_loop_block = BasicBlock(f"after_loop_block_{after_loop_block_id}")
-            cfg.block_counter += 1
-
-            # Add blocks to CFG
-            cfg.blocks[loop_block.name] = loop_block
-            cfg.blocks[after_loop_block.name] = after_loop_block
-
-            # Connect current block to loop block
-            current_block.add_successor(loop_block)
-
-            # Process loop condition if present
-            condition = node.attributes.get("condition")
-            if condition:
-                loop_block.add_statement(condition)
-
-            # Process loop body
-            loop_body = node.children
-            new_loop_block = self._process_node_list(loop_body, loop_block, cfg)
-
-            # Loop back to the loop block
-            new_loop_block.add_successor(loop_block)
-
-            # Exit loop to after_loop_block
-            loop_block.add_successor(after_loop_block)
-
-            # Continue from after_loop_block
-            current_block = after_loop_block
-
-        else:
-            # Process normal statements
-            current_block.add_statement(node)
-            current_block = self._process_node_list(node.children, current_block, cfg)
-
-        return current_block
-
-    def _process_node_list(self, nodes: List[IRNode], current_block: BasicBlock, cfg: ControlFlowGraph) -> BasicBlock:
+    def _process_node_list(
+        self, nodes: List[IRNode], current_block: BasicBlock, cfg: ControlFlowGraph
+    ) -> BasicBlock:
         """Process a list of IR nodes and update the current block."""
-        for node in nodes:
-            current_block = self._process_node(node, current_block, cfg)
+        i = 0
+        while i < len(nodes):
+            node = nodes[i]
+
+            if node.node_type == IRNodeType.CONTROL_FLOW:
+                control_type = node.attributes.get("type")
+                if control_type == "if":
+                    # Check for a following 'else' node
+                    if (
+                        i + 1 < len(nodes)
+                        and nodes[i + 1].node_type == IRNodeType.CONTROL_FLOW
+                        and nodes[i + 1].attributes.get("type") == "else"
+                    ):
+                        else_node = nodes[i + 1]
+                        current_block = self._process_if_else_node(
+                            node, else_node, current_block, cfg
+                        )
+                        i += 2  # Skip both 'if' and 'else' nodes
+                    else:
+                        current_block = self._process_if_node(node, current_block, cfg)
+                        i += 1
+                else:
+                    # Unknown CONTROL_FLOW type; process as normal
+                    current_block.add_statement(node)
+                    i += 1
+            elif node.node_type == IRNodeType.LOOP:
+                current_block = self._process_loop_node(node, current_block, cfg)
+                i += 1
+            else:
+                current_block.add_statement(node)
+                i += 1
         return current_block
+
+    def _process_if_node(
+        self, if_node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph
+    ) -> BasicBlock:
+        """Process an 'if' node without an 'else'."""
+        # Process condition
+        condition = if_node.attributes.get("condition")
+        if condition:
+            current_block.add_statement(condition)
+
+        # Create if block
+        if_block_name = f"if_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        if_block = BasicBlock(if_block_name)
+        cfg.blocks[if_block_name] = if_block
+
+        # Create end block
+        end_block_name = f"end_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        end_block = BasicBlock(end_block_name)
+        end_block.is_join_point = True
+        cfg.blocks[end_block_name] = end_block
+
+        # Connect blocks
+        current_block.add_successor(if_block)      # True branch
+        current_block.add_successor(end_block)     # False branch
+        # Process 'if' block
+        new_if_block = self._process_node_list(if_node.children, if_block, cfg)
+        new_if_block.add_successor(end_block)
+
+        # Continue from end block
+        return end_block
+
+    def _process_if_else_node(
+        self, if_node: IRNode, else_node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph
+    ) -> BasicBlock:
+        """Process an 'if' node followed by an 'else' node."""
+        # Process condition
+        condition = if_node.attributes.get("condition")
+        if condition:
+            current_block.add_statement(condition)
+
+        # Create if block
+        if_block_name = f"if_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        if_block = BasicBlock(if_block_name)
+        cfg.blocks[if_block_name] = if_block
+
+        # Create else block
+        else_block_name = f"else_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        else_block = BasicBlock(else_block_name)
+        cfg.blocks[else_block_name] = else_block
+
+        # Create end block
+        end_block_name = f"end_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        end_block = BasicBlock(end_block_name)
+        end_block.is_join_point = True
+        cfg.blocks[end_block_name] = end_block
+
+        # Connect current block to if and else blocks
+        current_block.add_successor(if_block)
+        current_block.add_successor(else_block)
+
+        # Process 'if' block
+        new_if_block = self._process_node_list(if_node.children, if_block, cfg)
+        new_if_block.add_successor(end_block)
+
+        # Process 'else' block
+        new_else_block = self._process_node_list(else_node.children, else_block, cfg)
+        new_else_block.add_successor(end_block)
+
+        # Continue from end block
+        return end_block
+
+    def _process_loop_node(
+        self, loop_node: IRNode, current_block: BasicBlock, cfg: ControlFlowGraph
+    ) -> BasicBlock:
+        """Process a loop node."""
+        # Process condition if present
+        condition = loop_node.attributes.get("condition")
+        if condition:
+            current_block.add_statement(condition)
+
+        # Create loop header block
+        loop_header_name = f"loop_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        loop_header = BasicBlock(loop_header_name)
+        cfg.blocks[loop_header_name] = loop_header
+
+        # Create after loop block
+        after_loop_block_name = f"after_loop_block_{cfg.block_counter}"
+        cfg.block_counter += 1
+        after_loop_block = BasicBlock(after_loop_block_name)
+        after_loop_block.is_join_point = True
+        cfg.blocks[after_loop_block_name] = after_loop_block
+
+        # Connect current block to loop header
+        current_block.add_successor(loop_header)
+
+        # Loop header decision
+        loop_header.add_successor(after_loop_block)  # False branch exits loop
+        loop_header.add_successor(loop_header)       # True branch continues loop
+
+        # Process loop body
+        loop_body_block = loop_header
+        new_loop_block = self._process_node_list(loop_node.children, loop_body_block, cfg)
+        # Loop back to loop header
+        new_loop_block.add_successor(loop_header)
+
+        # Continue from after loop block
+        return after_loop_block
