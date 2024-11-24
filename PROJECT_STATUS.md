@@ -1,87 +1,75 @@
 # LAPA Project Status
 
-## Current Phase: Extended Language Support (Phase 2)
+## Current Phase: Program Analysis Enhancements (Phase 3)
 
 ### Latest Updates
 
-- **All Tests Passing**
+- **Shift in Project Focus**
 
-  - Executed `pytest` and confirmed that all tests are passing (`pytest` reports 0 failed tests).
-  - Test coverage is at **80%**.
-  - Updated coverage reports and documentation.
+  - Decided to conclude the addition of new language frontends.
+  - Removed support for LLVM and Swift from the project.
+  - Updated all relevant documents to reflect this decision.
 
-- **Documentation Improvements**
+- **Program Analysis Implementation**
 
-  - Updated `README.md` to reflect recent progress.
-  - Improved code comments and docstrings throughout the codebase.
-  - Enhanced `ROADMAP.md` with updated tasks and milestones.
+  - Beginning enhancements of existing program analysis modules.
+  - Planning new analysis features to improve code insights.
 
 ### Current Focus
 
-- **Swift Frontend Development**
+- **Enhancing Program Analysis Code**
 
-  - Integrate Swift compiler or parser.
-  - Implement AST to IR conversion for Swift code.
-  - Add support for iOS/macOS frameworks.
+  - Improve existing analyzers (e.g., control flow, data flow, type inference).
+  - Implement new analysis modules to extend functionality.
+  - Refactor codebase for better maintainability and performance.
 
-- **Documentation Enhancement**
+- **Documentation Update**
 
-  - Continue updating project documentation to include new features.
-  - Improve code comments and docstrings.
+  - Update project documentation to reflect the new focus.
+  - Enhance code comments and docstrings for clarity.
+  - Refresh `README.md`, `ROADMAP.md`, and other documents.
 
 ### Recent Achievements
 
-- ✅ **All Tests Passing**
+- ✅ **Removal of LLVM and Swift Support**
 
-  - Resolved all test failures.
-  - Achieved 80% test coverage across the codebase.
-  - All tests are passing (`pytest` reports 0 failed tests).
-
-- ✅ **Swift Frontend Implementation**
-
-  - Added `SwiftFrontend` class in `lapa/frontends/swift.py`.
-  - Implemented placeholder methods for parsing and AST to IR conversion.
-  - Registered the Swift frontend in the `FrontendRegistry`.
-  - Added unit tests in `tests/frontends/test_swift.py`.
-  - Committed and pushed the changes to the repository.
-
-- ✅ **Type Inference Analyzer Fixes**
-
-  - Resolved issues in the `TypeInferenceAnalyzer`.
-  - Added comprehensive tests in `tests/analysis/test_type_inference.py`.
-  - Improved test coverage to 84% for `type_inference.py`.
-  - All tests are passing.
+  - Removed all files and references related to LLVM and Swift frontends.
+  - Updated `lapa/frontends/__init__.py` and `lapa/frontends/grammars/__init__.py`.
+  - Adjusted unit tests to exclude LLVM and Swift components.
+  - Committed and pushed changes to the repository.
 
 - ✅ **Documentation Updates**
 
-  - Updated `README.md` to reflect recent progress and next steps.
-  - Improved code comments and docstrings.
-  - Committed and pushed changes to the repository.
+  - Updated `PROJECT_STATUS.md` to reflect the new project direction.
+  - Revised documentation to remove mentions of LLVM and Swift.
+  - Committed and pushed documentation changes.
 
 ### Upcoming Tasks
 
-1. Integrate the Swift compiler or parser into the Swift frontend.
-2. Implement AST to IR conversion for Swift code.
-3. Begin iOS/macOS framework support in the Swift frontend.
-4. Continue enhancing project documentation.
+1. Implement enhancements in the control flow analyzer.
+2. Develop advanced data flow analysis features.
+3. Introduce new type inference mechanisms.
+4. Update unit tests to cover new analysis code.
+5. Continue improving project documentation.
 
 ### Known Issues
 
-- Need to improve error messages for missing LLVM/Clang.
+- None at this time.
 
 ### Current Priorities
 
-1. Continue Swift frontend development.
-2. Enhance documentation across the project.
+1. Enhance program analysis modules.
+2. Maintain high test coverage (>80%) as new features are added.
+3. Keep documentation up-to-date with code changes.
 
 ## Statistics
 
 - **Project Start Date**: 2024
-- **Current Version**: 0.0.4-dev
-- **Test Coverage**: **80%**
+- **Current Version**: 0.0.5-dev
+- **Test Coverage**: **79%**
 
-  - Updated coverage for `type_inference.py`: 84%.
-  - Increased overall test coverage.
+  - Aim to improve coverage with new analysis features.
+  - Monitoring coverage as codebase evolves.
 
 - **Language Support Status**:
 
@@ -92,15 +80,13 @@
   - ✅ C/C++ (Complete)
   - ✅ Rust (Complete)
   - ✅ Java (Complete)
-  - ⚙️ Swift (In Progress)
 
-    - Frontend structure implemented.
-    - Registered with `FrontendRegistry`.
-    - Initial tests added and passing.
+  _No further language frontends will be added at this time._
 
 [Previous achievements remain unchanged]
 
 ## Next Milestone
 
-- Implement AST to IR conversion for Swift.
-- Enhance documentation throughout the project.
+- Implement and enhance program analysis code.
+- Achieve test coverage above 85% with new features.
+- Refactor codebase for improved performance and maintainability.

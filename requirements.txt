@@ -3,7 +3,8 @@ pytest>=8.0.0
 pytest-cov>=6.0.0
 
 # Language frontends
-tree-sitter==0.20.4
+tree-sitter>=0.20.4
+tree_sitter_languages>=0.0.6
 
 # Optional dependencies
 clang>=14.0.0; platform_system != "Windows"  # LLVM/Clang bindings for C/C++ support

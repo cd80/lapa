@@ -24,96 +24,59 @@
     - [x] Update unit tests for IR enhancements
     - [x] Update documentation to reflect IR enhancements
 
-- [x] **Python Support**
+- [x] **Initial Language Support**
 
-  - [x] Parser implementation
-  - [x] IR conversion
-  - [x] Basic analysis capabilities
-  - [x] Tree-sitter integration
+  - [x] **Python Support**
 
-- [x] **JavaScript/TypeScript Support**
+    - [x] Parser implementation
+    - [x] IR conversion
+    - [x] Basic analysis capabilities
+    - [x] Tree-sitter integration
 
-  - [x] Frontend structure
-  - [x] Feature detection
-  - [x] Tree-sitter integration
-  - [x] AST to IR conversion
-  - [x] TypeScript-specific features
+  - [x] **JavaScript/TypeScript Support**
 
-- [x] **C/C++ Support**
+    - [x] Frontend structure
+    - [x] Feature detection
+    - [x] Tree-sitter integration
+    - [x] AST to IR conversion
+    - [x] TypeScript-specific features
 
-  - [x] Frontend structure
-  - [x] LLVM integration
-  - [x] AST to IR conversion
-  - [x] Preprocessor handling
-  - [x] Template support
-  - [x] Tree-sitter integration
+  - [x] **C/C++ Support**
 
-- [x] **Rust Support**
+    - [x] Frontend structure
+    - [x] AST to IR conversion
+    - [x] Preprocessor handling
+    - [x] Template support
+    - [x] Tree-sitter integration
 
-  - [x] Frontend structure
-  - [x] Cargo integration
-  - [x] AST to IR conversion
-  - [x] Ownership system analysis
+  - [x] **Rust Support**
 
-- [x] **Java Support**
+    - [x] Frontend structure
+    - [x] Cargo integration
+    - [x] AST to IR conversion
+    - [x] Ownership system analysis
 
-  - [x] Frontend structure
-  - [ ] JDK integration
-  - [x] AST to IR conversion
-  - [ ] Bytecode analysis
+  - [x] **Java Support**
 
-## Phase 2: Extended Language Support
+    - [x] Frontend structure
+    - [ ] JDK integration
+    - [x] AST to IR conversion
+    - [ ] Bytecode analysis
 
-- [x] **Swift Support**
+## Phase 2: Program Analysis Enhancements
 
-  - [x] Frontend structure
-  - [ ] Swift compiler integration
-  - [ ] AST to IR conversion
-  - [ ] iOS/macOS framework support
+- [ ] **Enhance Static Analysis**
 
-- [ ] **Kotlin Support**
-
-  - [ ] Frontend structure
-  - [ ] Kotlin compiler integration
-  - [ ] AST to IR conversion
-  - [ ] Android framework support
-
-- [ ] **Objective-C Support**
-
-  - [ ] Frontend structure
-  - [ ] Clang integration
-  - [ ] AST to IR conversion
-  - [ ] iOS/macOS framework support
-
-## Phase 3: Additional Language Support
-
-- [ ] **Erlang Support**
-
-  - [ ] Frontend structure
-  - [ ] OTP integration
-  - [ ] AST to IR conversion
-  - [ ] Concurrent process analysis
-
-- [ ] **Perl Support**
-
-  - [ ] Frontend structure
-  - [ ] Parser implementation
-  - [ ] AST to IR conversion
-  - [ ] Legacy code analysis
-
-## Phase 4: Analysis Techniques
-
-- [x] **Static Analysis**
-
-  - [x] Control Flow Analysis
-  - [x] Data Flow Analysis
-  - [x] Type Inference
-  - [x] Dependency Analysis
-  - [x] **IR Optimization**
-    - [x] Implement initial `optimize` method in `IR` class
+  - [ ] Control Flow Analysis Improvements
+  - [ ] Data Flow Analysis Enhancements
+  - [ ] Type Inference Improvements
+  - [ ] Dependency Analysis Extensions
+  - [ ] IR Optimization Enhancements
     - [ ] Continue enhancing IR optimization features
+  - [ ] Update unit tests for new analysis features
+  - [ ] Improve code comments and documentation for analysis modules
 
-- [ ] **Dynamic Analysis**
+- [ ] **Implement Dynamic Analysis**
 
   - [ ] Profiling System
   - [ ] Runtime Monitoring
@@ -125,7 +88,7 @@
   - [ ] Taint Analysis
   - [ ] Security Policy Enforcement
 
-## Phase 5: LLM Integration
+## Phase 3: LLM Integration
 
 - [ ] **LLM Infrastructure**
 
@@ -139,7 +102,7 @@
   - [ ] Documentation Generation
   - [ ] Code Review Assistance
 
-## Phase 6: Advanced Features
+## Phase 4: Advanced Features
 
 - [ ] **Machine Learning Components**
 
@@ -153,7 +116,7 @@
   - [ ] Interactive Dashboards
   - [ ] Custom Report Generation
 
-## Phase 7: DevOps Integration
+## Phase 5: DevOps Integration
 
 - [ ] **CI/CD Integration**
 
@@ -167,7 +130,7 @@
   - [ ] Pull Request Analysis
   - [ ] Continuous Monitoring
 
-## Phase 8: Plugin Ecosystem
+## Phase 6: Plugin Ecosystem
 
 - [ ] **Plugin Marketplace**
 
@@ -183,9 +146,9 @@
 
 ## Future Considerations
 
-- [ ] Cloud Integration
-- [ ] Enterprise Features
-- [ ] Additional Language Support
-- [ ] Advanced IR Optimizations
-- [ ] Cross-Language Analysis
-- [ ] Performance Improvements
+- [ ] **Performance Improvements**
+- [ ] **Cross-Language Analysis**
+- [ ] **Enterprise Features**
+- [ ] **Cloud Integration**
+
+_Note: Removed sections related to LLVM, Swift, Kotlin, Objective-C, Erlang, and Perl support. Adjusted the roadmap to focus on program analysis enhancements and future development plans._

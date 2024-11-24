@@ -25,12 +25,14 @@ class LanguageFeature(Enum):
     STRUCTS = auto()
     ENUMS = auto()
     TRAITS = auto()
+    PROTOCOLS = auto()
     MACROS = auto()
     OPERATOR_OVERLOADING = auto()
     NAMESPACES = auto()
     MODULES = auto()
     PACKAGES = auto()
     IMPORTS = auto()
+    EXTENSIONS = auto()  # Added EXTENSIONS here
 
     # Memory management
     POINTERS = auto()

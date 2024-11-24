@@ -4,7 +4,7 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
 
 ## Features
 
-- **Multi-language Support**: Parse and analyze code written in multiple programming languages, including Python, JavaScript/TypeScript, C/C++, Rust, and **Java**.
+- **Multi-language Support**: Parse and analyze code written in multiple programming languages, including Python, JavaScript/TypeScript, C/C++, Rust, and Java.
 - **Enhanced Intermediate Representation (IR)**: Convert source code into a language-neutral IR for unified analysis. The IR system includes:
   - **Validation**: Ensure the integrity of the IR with the `validate` method, which checks for structural correctness and duplicate symbols.
   - **Building from AST**: Construct the IR directly from abstract syntax trees (AST) using the `build_from_ast` method.
@@ -27,7 +27,6 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
   - Support for functions, classes, imports, async/await, variable declarations, etc.
 - **C/C++**
   - Frontend structure established
-  - LLVM/Clang integration completed
   - AST to IR conversion implemented
   - Template support, operator overloading, parsing integration
 - **Rust**
@@ -39,18 +38,14 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
   - Tree-sitter integration completed
   - AST to IR conversion implemented
   - Support for classes, interfaces, enums, annotations, etc.
-- **Swift** (Planned)
-  - Frontend structure
-  - Swift compiler integration
-  - AST to IR conversion
-  - iOS/macOS framework support
 
 ## Current Status
 
-- **Phase 2: Extended Language Support**
-  - Recent improvements include fixes and comprehensive tests for the `TypeInferenceAnalyzer`.
-  - Test coverage has been significantly improved, ensuring robust functionality.
-  - Next steps include implementing the Swift frontend and further enhancing documentation.
+- **Phase 3: Program Analysis Enhancements**
+  - Shifted focus to enhancing program analysis modules.
+  - Removed support for LLVM and Swift.
+  - Improving control flow analysis, data flow analysis, type inference, and dependency analysis.
+  - Enhancing documentation and test coverage.
 
 ## Installation
 
