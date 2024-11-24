@@ -67,7 +67,7 @@ class TypeInferenceAnalyzer:
         elif node.node_type == IRNodeType.VARIABLE:
             # For variables, infer type based on assignments or definitions
             inferred_type = self.infer_variable_type(node)
-        elif node.node_type == IRNodeType.BINARY_OPERATION:
+        elif node.node_type == IRNodeType.BINARY_OP:  # Changed from BINARY_OPERATION
             # For binary operations, infer type based on operands
             inferred_type = self.infer_binary_operation_type(node)
         elif node.node_type == IRNodeType.FUNCTION_CALL:
@@ -300,5 +300,3 @@ class TypeInferenceAnalyzer:
                 elif operator in ['==', '!=', '<', '<=', '>', '>=']:
                     return 'bool'
             return 'unknown'
-
-    # Additional methods can be added here to handle more complex cases

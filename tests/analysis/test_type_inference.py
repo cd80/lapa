@@ -52,7 +52,7 @@ class TestTypeInferenceAnalyzer(unittest.TestCase):
             node_type=IRNodeType.LITERAL, attributes={'value': 10}
         )
         bin_op_node = IRNode(
-            node_type=IRNodeType.BINARY_OPERATION,
+            node_type=IRNodeType.BINARY_OP,  # Changed from BINARY_OPERATION
             attributes={
                 'operator': '+',
                 'left_operand': left_node,
@@ -175,7 +175,7 @@ class TestTypeInferenceAnalyzer(unittest.TestCase):
             node_type=IRNodeType.LITERAL, attributes={'value': 3.5}
         )
         bin_op_node = IRNode(
-            node_type=IRNodeType.BINARY_OPERATION,
+            node_type=IRNodeType.BINARY_OP,  # Changed from BINARY_OPERATION
             attributes={
                 'operator': '*',
                 'left_operand': left_node,
