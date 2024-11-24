@@ -34,6 +34,8 @@ class IRNodeType(Enum):
     LOOP = auto()
     CALL = auto()
     OPERATOR = auto()
+    NO_OP = auto()  # Added NO_OP node type
+    BLOCK = auto()  # Added BLOCK node type
     # Added new node types
     STRUCT = auto()
     ENUM = auto()

@@ -1,15 +1,16 @@
 # LAPA Project Status
 
-## Current Phase: Foundation (Phase 1)
+## Current Phase: Analysis Development (Phase 2)
 
 ### Latest Updates
 
-- Completed ownership system analysis for Rust
-  - Ownership, borrowing, and lifetime analysis implemented
-  - Updated `RustFrontend` to include ownership information in the IR
-  - Comprehensive tests for ownership features added (`tests/frontends/test_rust_ownership.py`)
+- Implemented Control Flow Analysis
+  - `ControlFlowAnalyzer` class added in `lapa/analysis/control_flow.py`
+  - Ability to construct Control Flow Graphs (CFGs) from the IR
+  - Unit tests added in `tests/analysis/test_control_flow.py` to verify CFG correctness
+  - Fixed issues with CFG construction logic
 - All tests passing (`pytest` reports 0 failed tests)
-- Improved test coverage (87% overall)
+- Improved test coverage (88% overall)
 - Enhanced IR system capabilities
 
 ### Current Focus
@@ -71,13 +72,18 @@
     - `tests/frontends/test_rust.py`
     - `tests/frontends/test_rust_ownership.py`
   - All tests passing (0 failed tests)
-- ✅ Comprehensive test suite with high coverage (87%)
+- ✅ Control Flow Analysis:
+  - Implemented `ControlFlowAnalyzer` for constructing CFGs
+  - Integrated into the analyzer system
+  - Unit tests added to verify CFG correctness
+  - All tests passing (0 failed tests)
+- ✅ Comprehensive test suite with high coverage (88%)
 - ✅ Documentation framework established
 - ✅ Development roadmap updated
 
 ### Upcoming Tasks
 
-1. Start implementing advanced analysis features
+1. Implement advanced analysis features (e.g., data flow analysis)
 2. Enhance IR optimization features
 3. Improve documentation
 4. Begin Java frontend planning
@@ -88,7 +94,7 @@
 
 ### Current Priorities
 
-1. Start implementing advanced analysis features
+1. Implement advanced analysis features
 2. Enhance IR optimization features
 3. Improve documentation
 4. Begin Java frontend planning
@@ -97,10 +103,11 @@
 
 - **Project Start Date**: 2024
 - **Current Version**: 0.0.1-dev
-- **Test Coverage**: 87%
+- **Test Coverage**: 88%
 
   - lapa/**\_\_init\_\_**.py: 100%
-  - lapa/analyzer.py: 88%
+  - lapa/analyzer.py: 85%
+  - lapa/analysis/control_flow.py: 92%
   - lapa/frontend.py: 98%
   - lapa/frontends/python.py: 85%
   - lapa/frontends/javascript.py: 86%
@@ -113,6 +120,7 @@
   - lapa/frontends/grammars/**\_\_init\_\_**.py: 100%
   - lapa/ir.py: 85%
   - lapa/plugin.py: 69%
+  - lapa/analysis/**\_\_init\_\_**.py: 100%
 
 - **Language Support Status**:
   Current Support:
@@ -147,18 +155,22 @@
       - Mutability and lifetime annotations
     - Comprehensive test suite added
     - All tests passing
+  - ✅ Control Flow Analysis (Complete)
+    - `ControlFlowAnalyzer` implemented
+    - CFG construction from IR
+    - Unit tests added and passing
 
-  Phase 1 (Planned):
+  Phase 2 (Planned):
 
   - 📅 Java
 
-  Phase 2 (Upcoming):
+  Phase 3 (Upcoming):
 
   - 📅 Swift
   - 📅 Kotlin
   - 📅 Objective-C
 
-  Phase 3 (Future):
+  Phase 4 (Future):
 
   - 📅 Erlang
   - 📅 Perl
@@ -186,7 +198,11 @@
     - ✅ AST conversion
     - ✅ Ownership system analysis
     - ✅ Comprehensive testing
-  - 🔄 Analysis Features (In Progress)
+  - ✅ Control Flow Analysis
+    - ✅ CFG construction
+    - ✅ Integration into analyzer
+    - ✅ Comprehensive testing
+  - 🔄 Advanced Analysis Features (In Progress)
   - 📅 LLM Integration (Planned)
 
 ## Contributing
@@ -199,7 +215,7 @@ We are in the early stages of development. If you're interested in contributing,
 
 ## Next Milestone
 
-- Start implementing advanced analysis features
+- Implement advanced analysis features (e.g., data flow analysis)
 - Enhance IR optimization features
 - Improve documentation
 - Begin Java frontend planning

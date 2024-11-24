@@ -11,6 +11,7 @@ from pathlib import Path
 from .ir import IR
 from .plugin import Plugin
 from .analysis.control_flow import ControlFlowAnalyzer
+from .analysis.data_flow import DataFlowAnalyzer  # Imported DataFlowAnalyzer
 
 
 class Analyzer:
@@ -100,6 +101,13 @@ class Analyzer:
         Perform control flow analysis on the current IR.
         """
         analyzer = ControlFlowAnalyzer()
+        analyzer.analyze(self.ir)
+
+    def perform_data_flow_analysis(self) -> None:
+        """
+        Perform data flow analysis on the current IR.
+        """
+        analyzer = DataFlowAnalyzer()
         analyzer.analyze(self.ir)
 
     def get_ir(self) -> IR:
