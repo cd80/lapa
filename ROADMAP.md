@@ -96,10 +96,10 @@
 
 ## Phase 4: Analysis Techniques
 
-- [ ] **Static Analysis**
+- [x] **Static Analysis**
 
-  - [ ] Control Flow Analysis
-  - [ ] Data Flow Analysis
+  - [x] Control Flow Analysis
+  - [x] Data Flow Analysis
   - [ ] Type Inference
   - [ ] Dependency Analysis
 

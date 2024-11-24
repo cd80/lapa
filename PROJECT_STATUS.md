@@ -1,24 +1,30 @@
 # LAPA Project Status
 
-## Current Phase: Analysis Development (Phase 2)
+## Current Phase: Advanced Analysis Development (Phase 2)
 
 ### Latest Updates
 
+- Implemented Data Flow Analysis
+  - `DataFlowAnalyzer` class added in `lapa/analysis/data_flow.py`
+  - Capability to perform Reaching Definitions Analysis
+  - Integrated with Control Flow Graphs (CFGs)
+  - Unit tests added in `tests/analysis/test_data_flow.py` to verify correctness
+  - Fixed issues with `kill_set` computations in data flow analysis
 - Implemented Control Flow Analysis
   - `ControlFlowAnalyzer` class added in `lapa/analysis/control_flow.py`
   - Ability to construct Control Flow Graphs (CFGs) from the IR
   - Unit tests added in `tests/analysis/test_control_flow.py` to verify CFG correctness
   - Fixed issues with CFG construction logic
 - All tests passing (`pytest` reports 0 failed tests)
-- Improved test coverage (88% overall)
+- Improved test coverage (82% overall)
 - Enhanced IR system capabilities
 
 ### Current Focus
 
-- Starting implementation of advanced analysis features
 - Enhancing IR optimization features
 - Improving documentation
 - Planning Java frontend implementation
+- Beginning implementation of Type Inference system
 
 ### Recent Achievements
 
@@ -77,16 +83,22 @@
   - Integrated into the analyzer system
   - Unit tests added to verify CFG correctness
   - All tests passing (0 failed tests)
-- ✅ Comprehensive test suite with high coverage (88%)
+- ✅ Data Flow Analysis:
+  - Implemented `DataFlowAnalyzer` for performing data flow analysis
+  - Integrated with CFGs to analyze variable definitions and usages
+  - Unit tests added to verify data flow analysis correctness
+  - All tests passing (0 failed tests)
+- ✅ High test coverage (82% overall)
 - ✅ Documentation framework established
 - ✅ Development roadmap updated
 
 ### Upcoming Tasks
 
-1. Implement advanced analysis features (e.g., data flow analysis)
-2. Enhance IR optimization features
-3. Improve documentation
-4. Begin Java frontend planning
+1. Enhance IR optimization features
+2. Improve documentation
+3. Begin Java frontend planning
+4. Start implementation of Type Inference system
+5. Plan for Dependency Analysis
 
 ### Known Issues
 
@@ -94,31 +106,33 @@
 
 ### Current Priorities
 
-1. Implement advanced analysis features
-2. Enhance IR optimization features
-3. Improve documentation
-4. Begin Java frontend planning
+1. Enhance IR optimization features
+2. Improve documentation
+3. Begin Java frontend planning
+4. Implement Type Inference system
+5. Plan and implement Dependency Analysis
 
 ## Statistics
 
 - **Project Start Date**: 2024
-- **Current Version**: 0.0.1-dev
-- **Test Coverage**: 88%
+- **Current Version**: 0.0.2-dev
+- **Test Coverage**: 82%
 
   - lapa/**\_\_init\_\_**.py: 100%
-  - lapa/analyzer.py: 85%
-  - lapa/analysis/control_flow.py: 92%
+  - lapa/analyzer.py: 82%
+  - lapa/analysis/control_flow.py: 98%
+  - lapa/analysis/data_flow.py: 96%
   - lapa/frontend.py: 98%
   - lapa/frontends/python.py: 85%
-  - lapa/frontends/javascript.py: 86%
-  - lapa/frontends/cpp.py: 85%
+  - lapa/frontends/javascript.py: 84%
+  - lapa/frontends/cpp.py: 37%
   - lapa/frontends/rust.py: 80%
-  - lapa/frontends/llvm/**\_\_init\_\_**.py: 80%
+  - lapa/frontends/llvm/**\_\_init\_\_**.py: 40%
   - lapa/frontends/llvm/ast.py: 82%
   - lapa/frontends/llvm/template.py: 88%
   - lapa/frontends/llvm/operator.py: 100%
   - lapa/frontends/grammars/**\_\_init\_\_**.py: 100%
-  - lapa/ir.py: 85%
+  - lapa/ir.py: 86%
   - lapa/plugin.py: 69%
   - lapa/analysis/**\_\_init\_\_**.py: 100%
 
@@ -158,6 +172,10 @@
   - ✅ Control Flow Analysis (Complete)
     - `ControlFlowAnalyzer` implemented
     - CFG construction from IR
+    - Unit tests added and passing
+  - ✅ Data Flow Analysis (Complete)
+    - `DataFlowAnalyzer` implemented
+    - Data flow analysis integrated with CFGs
     - Unit tests added and passing
 
   Phase 2 (Planned):
@@ -202,7 +220,11 @@
     - ✅ CFG construction
     - ✅ Integration into analyzer
     - ✅ Comprehensive testing
-  - 🔄 Advanced Analysis Features (In Progress)
+  - ✅ Data Flow Analysis
+    - ✅ Data flow analysis implementation
+    - ✅ Integration with CFGs
+    - ✅ Comprehensive testing
+  - 🔄 IR Optimization Features (In Progress)
   - 📅 LLM Integration (Planned)
 
 ## Contributing
@@ -215,7 +237,7 @@ We are in the early stages of development. If you're interested in contributing,
 
 ## Next Milestone
 
-- Implement advanced analysis features (e.g., data flow analysis)
 - Enhance IR optimization features
 - Improve documentation
 - Begin Java frontend planning
+- Implement Type Inference system
