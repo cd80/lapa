@@ -4,8 +4,8 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
 
 ## Features
 
-- **Multi-language Support**: Parse and analyze code written in multiple programming languages.
-- **Enhanced Intermediate Representation (IR)**: Convert source code into a language-neutral IR for unified analysis. The IR system now includes:
+- **Multi-language Support**: Parse and analyze code written in multiple programming languages, including Python, JavaScript/TypeScript, C/C++, Rust, and **Java**.
+- **Enhanced Intermediate Representation (IR)**: Convert source code into a language-neutral IR for unified analysis. The IR system includes:
   - **Validation**: Ensure the integrity of the IR with the `validate` method, which checks for structural correctness and duplicate symbols.
   - **Building from AST**: Construct the IR directly from abstract syntax trees (AST) using the `build_from_ast` method.
   - **Optimization**: Optimize the IR for more efficient analysis with the `optimize` method.
@@ -15,6 +15,29 @@ LAPA is a language-agnostic program analysis framework designed to provide compr
 - **Type Inference Analyzer**: Infer types of variables and expressions in code without explicit type annotations.
 - **Dependency Analyzer**: Analyze dependencies between functions, variables, and modules to understand code relationships.
 - **Plugin Architecture**: Extend the framework with custom analysis plugins.
+
+## Supported Languages
+
+- **Python**
+  - Tree-sitter integration completed
+  - Support for functions, classes, imports, control flow, etc.
+- **JavaScript/TypeScript**
+  - Tree-sitter integration completed
+  - Support for functions, classes, imports, async/await, variable declarations, etc.
+- **C/C++**
+  - Frontend structure established
+  - LLVM/Clang integration completed
+  - AST to IR conversion implemented
+  - Template support, operator overloading, parsing integration
+- **Rust**
+  - Frontend structure implemented
+  - Cargo integration completed
+  - AST to IR conversion implemented
+  - Ownership system analysis
+- **Java**
+  - Tree-sitter integration completed
+  - AST to IR conversion implemented
+  - Support for classes, interfaces, enums, annotations, etc.
 
 ## Installation
 
@@ -26,7 +49,7 @@ Instructions for using LAPA.
 
 ### Intermediate Representation (IR)
 
-The IR system serves as the core of LAPA, providing a unified representation of programs across different languages. Recent enhancements include the implementation of key methods and improvements to the `IRNode` class.
+The IR system serves as the core of LAPA, providing a unified representation of programs across different languages. Enhancements include the implementation of key methods and improvements to the `IRNode` class.
 
 #### Validation
 
@@ -70,7 +93,7 @@ ir.optimize()
 
 #### Improved IRNode Class
 
-The `IRNode` class now includes additional helper methods for better manipulation and traversal.
+The `IRNode` class includes additional helper methods for better manipulation and traversal.
 
 - **get_symbols**: Retrieve all symbol names defined in the node and its children.
 - **find_nodes_by_type**: Find all nodes of a specific type.
@@ -114,8 +137,13 @@ dependencies = analyzer.get_dependencies()
 
 ## Contributing
 
-Instructions for contributing.
+Contributions are welcome! Please follow these steps:
+
+1. Review our [CONTRIBUTING.md](CONTRIBUTING.md) guide.
+2. Check the [ROADMAP.md](ROADMAP.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md) for current priorities.
+3. Look for issues labeled "good first issue".
+4. Submit pull requests with clear descriptions of your changes.
 
 ## License
 
-License information.
+LAPA is licensed under the MIT License. See [LICENSE](LICENSE) for more information.

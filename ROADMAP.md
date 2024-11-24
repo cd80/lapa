@@ -55,10 +55,11 @@
   - [x] AST to IR conversion
   - [x] Ownership system analysis
 
-- [ ] **Java Support**
-  - [ ] Frontend structure
+- [x] **Java Support**
+
+  - [x] Frontend structure
   - [ ] JDK integration
-  - [ ] AST to IR conversion
+  - [x] AST to IR conversion
   - [ ] Bytecode analysis
 
 ## Phase 2: Extended Language Support
@@ -78,6 +79,7 @@
   - [ ] Android framework support
 
 - [ ] **Objective-C Support**
+
   - [ ] Frontend structure
   - [ ] Clang integration
   - [ ] AST to IR conversion
@@ -93,6 +95,7 @@
   - [ ] Concurrent process analysis
 
 - [ ] **Perl Support**
+
   - [ ] Frontend structure
   - [ ] Parser implementation
   - [ ] AST to IR conversion
