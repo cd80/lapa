@@ -8,12 +8,13 @@ the framework for representing and manipulating program structures.
 from enum import Enum, auto
 from typing import Any, Dict, List, Optional, Set
 from dataclasses import dataclass
+from collections import Counter
 
 
 class IRNodeType(Enum):
     """Types of IR nodes."""
     PROGRAM = auto()
-    FUNCTION_DEF = auto()  # Added FUNCTION_DEF
+    FUNCTION_DEF = auto()
     FUNCTION = auto()
     CLASS = auto()
     METHOD = auto()
@@ -31,16 +32,16 @@ class IRNodeType(Enum):
     MODULE = auto()
     PACKAGE = auto()
     RETURN = auto()
-    ASSIGNMENT = auto()          # Added ASSIGNMENT
+    ASSIGNMENT = auto()
     CONTROL_FLOW = auto()
-    LOOP = auto()                # Already present
+    LOOP = auto()
     CALL = auto()
-    FUNCTION_CALL = auto()       # Added FUNCTION_CALL
+    FUNCTION_CALL = auto()
     OPERATOR = auto()
-    NO_OP = auto()               # Already present
-    BLOCK = auto()               # Already present
-    BINARY_OPERATION = auto()    # Added BINARY_OPERATION
-    CONDITIONAL = auto()         # Added CONDITIONAL
+    NO_OP = auto()
+    BLOCK = auto()
+    BINARY_OPERATION = auto()
+    CONDITIONAL = auto()
     # Additional node types
     STRUCT = auto()
     ENUM = auto()
@@ -101,13 +102,27 @@ class IRNode:
         self.children.remove(child)
         child.parent = None
 
-    def get_symbols(self) -> Dict[str, Any]:
-        """Get all symbol names defined in this node and its children."""
-        symbols = {}
-        if self.name:
-            symbols[self.name] = self
+    def get_symbols(self) -> List[str]:
+        """
+        Get all symbol names defined in this node and its children.
+
+        Returns:
+            A list of symbol names.
+        """
+        symbols = []
+        if self.node_type in {
+            IRNodeType.FUNCTION_DEF,
+            IRNodeType.FUNCTION,
+            IRNodeType.CLASS,
+            IRNodeType.VARIABLE,
+            IRNodeType.STRUCT,
+            IRNodeType.ENUM,
+            IRNodeType.TRAIT,
+            IRNodeType.MACRO,
+        } and self.name:
+            symbols.append(self.name)
         for child in self.children:
-            symbols.update(child.get_symbols())
+            symbols.extend(child.get_symbols())
         return symbols
 
     def get_types(self) -> Dict[str, Any]:
@@ -145,6 +160,64 @@ class IRNode:
                 return result
 
         return None
+
+    def find_nodes_by_type(self, node_type: IRNodeType) -> List['IRNode']:
+        """Find all nodes of a specific type in the subtree starting from this node."""
+        nodes = []
+        if self.node_type == node_type:
+            nodes.append(self)
+        for child in self.children:
+            nodes.extend(child.find_nodes_by_type(node_type))
+        return nodes
+
+    @staticmethod
+    def from_ast_node(ast_node: Any) -> 'IRNode':
+        """
+        Create an IRNode from an AST node.
+
+        Args:
+            ast_node: The AST node to convert.
+
+        Returns:
+            The corresponding IRNode.
+        """
+        # Placeholder implementation; actual implementation depends on AST structure
+        node_type_mapping = {
+            'FunctionDef': IRNodeType.FUNCTION_DEF,
+            'ClassDef': IRNodeType.CLASS,
+            'Assign': IRNodeType.ASSIGNMENT,
+            'Call': IRNodeType.FUNCTION_CALL,
+            'If': IRNodeType.CONDITIONAL,
+            'For': IRNodeType.LOOP,
+            'While': IRNodeType.LOOP,
+            'Return': IRNodeType.RETURN,
+            'Import': IRNodeType.IMPORT,
+            # Add more mappings as needed
+        }
+
+        node_type = node_type_mapping.get(ast_node.__class__.__name__, IRNodeType.NO_OP)
+
+        name = getattr(ast_node, 'name', None)
+        position = Position(
+            line=getattr(ast_node, 'lineno', -1),
+            column=getattr(ast_node, 'col_offset', -1),
+            file=getattr(ast_node, 'filename', '')
+        )
+        attributes = {}  # Extract relevant attributes from the AST node
+
+        ir_node = IRNode(
+            node_type=node_type,
+            name=name,
+            position=position,
+            attributes=attributes
+        )
+
+        # Recursively convert child nodes
+        for child_ast in getattr(ast_node, 'body', []):
+            child_ir = IRNode.from_ast_node(child_ast)
+            ir_node.add_child(child_ir)
+
+        return ir_node
 
 
 class Function(IRNode):
@@ -325,20 +398,74 @@ class IR:
 
     def validate(self) -> bool:
         """Validate the IR structure."""
-        # TODO: Implement validation
+        errors = []
+
+        # Collect all symbol names, including duplicates
+        symbol_names = self.root.get_symbols()
+
+        # Count occurrences to find duplicates
+        symbol_counts = Counter(symbol_names)
+        duplicates = [name for name, count in symbol_counts.items() if count > 1]
+
+        if duplicates:
+            errors.append(f"Duplicate symbols found: {', '.join(duplicates)}")
+
+        # Check for nodes with invalid types or missing names
+        def validate_node(node: IRNode):
+            if not isinstance(node.node_type, IRNodeType):
+                errors.append(f"Invalid node type at {node}")
+            if node.node_type in {
+                IRNodeType.CLASS,
+                IRNodeType.FUNCTION,
+                IRNodeType.FUNCTION_DEF,
+                IRNodeType.VARIABLE,
+                IRNodeType.STRUCT,
+                IRNodeType.ENUM,
+                IRNodeType.TRAIT,
+                IRNodeType.MACRO,
+            } and not node.name:
+                errors.append(f"Missing name for node type {node.node_type}")
+            for child in node.children:
+                if child.parent != node:
+                    errors.append(f"Parent-child relationship broken between {node} and {child}")
+                validate_node(child)
+
+        validate_node(self.root)
+
+        # Report errors if any
+        if errors:
+            for error in errors:
+                print("Validation Error:", error)
+            return False
         return True
 
     def build_from_ast(self, ast: Any) -> None:
         """Build IR from an AST."""
-        raise NotImplementedError("build_from_ast not implemented")
+        self.clear()
+        ir_node = IRNode.from_ast_node(ast)
+        self.root.add_child(ir_node)
+        # Update symbol table and other structures
+        self.symbol_table.update({name: node for name, node in zip(self.root.get_symbols(), self.root.children)})
+        self.type_information.update(self.get_types())
+        self.dependencies.update(self.get_dependencies())
 
     def optimize(self) -> None:
         """Optimize the IR."""
-        raise NotImplementedError("optimize not implemented")
+        # Placeholder for optimization logic
+        pass
 
     def to_dot(self) -> str:
         """Convert to DOT format for visualization."""
-        raise NotImplementedError("to_dot not implemented")
+        lines = ['digraph IR {']
+
+        def add_edges(node: IRNode):
+            for child in node.children:
+                lines.append(f'  "{node.node_type.name}:{node.name}" -> "{child.node_type.name}:{child.name}";')
+                add_edges(child)
+
+        add_edges(self.root)
+        lines.append('}')
+        return '\n'.join(lines)
 
     def get_node_by_position(self, position: Position) -> Optional[IRNode]:
         """Find a node at the given source position."""
@@ -346,8 +473,23 @@ class IR:
 
     def get_symbols(self) -> Dict[str, Any]:
         """Get all symbol names defined in the IR."""
-        symbols = dict(self.symbol_table)
-        symbols.update(self.root.get_symbols())
+        # Updating symbol_table with all symbols collected
+        symbols = {}
+        def collect_symbols(node: IRNode):
+            if node.node_type in {
+                IRNodeType.FUNCTION_DEF,
+                IRNodeType.FUNCTION,
+                IRNodeType.CLASS,
+                IRNodeType.VARIABLE,
+                IRNodeType.STRUCT,
+                IRNodeType.ENUM,
+                IRNodeType.TRAIT,
+                IRNodeType.MACRO,
+            } and node.name:
+                symbols[node.name] = node
+            for child in node.children:
+                collect_symbols(child)
+        collect_symbols(self.root)
         return symbols
 
     def get_types(self) -> Dict[str, Any]:

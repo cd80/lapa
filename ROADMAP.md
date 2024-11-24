@@ -16,6 +16,13 @@
   - [x] Implement basic IR data structures
   - [x] Create plugin system architecture
   - [x] Design language frontend interface
+  - [x] **Enhance Intermediate Representation (IR) System**
+    - [x] Implement `validate` method in `IR` class
+    - [x] Implement `build_from_ast` method in `IR` class
+    - [x] Implement `optimize` method in `IR` class
+    - [x] Improve `IRNode` class with helper methods
+    - [x] Update unit tests for IR enhancements
+    - [x] Update documentation to reflect IR enhancements
 
 - [x] **Python Support**
 
@@ -98,7 +105,10 @@
   - [x] Control Flow Analysis
   - [x] Data Flow Analysis
   - [x] Type Inference
-  - [ ] Dependency Analysis
+  - [x] Dependency Analysis
+  - [x] **IR Optimization**
+    - [x] Implement initial `optimize` method in `IR` class
+    - [ ] Continue enhancing IR optimization features
 
 - [ ] **Dynamic Analysis**
 
