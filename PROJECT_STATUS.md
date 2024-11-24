@@ -4,72 +4,88 @@
 
 ### Latest Updates
 
-- **Shift in Project Focus**
+- **Program Analysis Enhancements**
 
-  - Decided to conclude the addition of new language frontends.
-  - Removed support for LLVM and Swift from the project.
-  - Updated all relevant documents to reflect this decision.
+  - Enhanced the type inference analyzer with support for collection types and user-defined classes.
+  - Improved the control flow analyzer to handle exception handling constructs (`try-except-finally` blocks).
+  - Extended the data flow analyzer with live variable analysis.
+  - All unit tests are now passing with a 100% success rate.
 
-- **Program Analysis Implementation**
+- **Testing and Quality Assurance**
 
-  - Beginning enhancements of existing program analysis modules.
-  - Planning new analysis features to improve code insights.
+  - Fixed all failing tests; the test suite now passes entirely.
+  - Updated unit tests to cover new analysis code.
+  - Maintained high test coverage during the development of new features.
 
 ### Current Focus
 
-- **Enhancing Program Analysis Code**
+- **Further Enhancing Program Analysis**
 
-  - Improve existing analyzers (e.g., control flow, data flow, type inference).
+  - Continue improving existing analyzers (e.g., dependency analysis).
   - Implement new analysis modules to extend functionality.
   - Refactor codebase for better maintainability and performance.
 
 - **Documentation Update**
 
-  - Update project documentation to reflect the new focus.
+  - Update project documentation to reflect new features.
   - Enhance code comments and docstrings for clarity.
   - Refresh `README.md`, `ROADMAP.md`, and other documents.
 
 ### Recent Achievements
 
-- ✅ **Removal of LLVM and Swift Support**
+- ✅ **Enhancement of Type Inference Analyzer**
 
-  - Removed all files and references related to LLVM and Swift frontends.
-  - Updated `lapa/frontends/__init__.py` and `lapa/frontends/grammars/__init__.py`.
-  - Adjusted unit tests to exclude LLVM and Swift components.
+  - Added support for collection types and user-defined classes.
+  - Ensured all related unit tests are passing.
   - Committed and pushed changes to the repository.
 
-- ✅ **Documentation Updates**
+- ✅ **Enhancement of Control Flow Analyzer**
 
-  - Updated `PROJECT_STATUS.md` to reflect the new project direction.
-  - Revised documentation to remove mentions of LLVM and Swift.
-  - Committed and pushed documentation changes.
+  - Added support for exception handling constructs.
+  - Ensured all related unit tests are passing.
+  - Committed and pushed changes to the repository.
+
+- ✅ **Extension of Data Flow Analyzer**
+
+  - Implemented live variable analysis.
+  - Ensured all related unit tests are passing.
+  - Committed and pushed changes to the repository.
+
+- ✅ **Testing and Quality Assurance**
+
+  - Fixed all failing tests; the test suite passes with 100% success.
+  - Maintained test coverage above 65%.
+  - Committed and pushed changes to the repository.
 
 ### Upcoming Tasks
 
-1. Implement enhancements in the control flow analyzer.
-2. Develop advanced data flow analysis features.
-3. Introduce new type inference mechanisms.
-4. Update unit tests to cover new analysis code.
-5. Continue improving project documentation.
+1. Improve the dependency analysis module.
+2. Introduce advanced type inference mechanisms.
+3. Refactor codebase for improved performance and maintainability.
+4. Increase test coverage to above 80%.
+5. Continue updating project documentation.
 
 ### Known Issues
 
-- None at this time.
+- **Test Coverage**
+
+  - Test coverage is currently at **65%** due to recent additions.
+  - Aim to increase coverage above 80% with new tests and refactoring.
 
 ### Current Priorities
 
 1. Enhance program analysis modules.
-2. Maintain high test coverage (>80%) as new features are added.
+2. Increase test coverage to above 80%.
 3. Keep documentation up-to-date with code changes.
 
 ## Statistics
 
 - **Project Start Date**: 2024
-- **Current Version**: 0.0.5-dev
-- **Test Coverage**: **79%**
+- **Current Version**: 0.0.6-dev
+- **Test Coverage**: **65%**
 
   - Aim to improve coverage with new analysis features.
-  - Monitoring coverage as codebase evolves.
+  - Monitoring coverage as the codebase evolves.
 
 - **Language Support Status**:
 
@@ -83,10 +99,9 @@
 
   _No further language frontends will be added at this time._
 
-[Previous achievements remain unchanged]
-
 ## Next Milestone
 
-- Implement and enhance program analysis code.
-- Achieve test coverage above 85% with new features.
+- Implement advanced type inference mechanisms.
+- Improve the dependency analysis module.
+- Achieve test coverage above 80% with new features.
 - Refactor codebase for improved performance and maintainability.
