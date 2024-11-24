@@ -26,12 +26,17 @@ LAPA is a comprehensive program analysis framework designed to support multiple 
   - Tree-sitter integration completed
 - ✅ C/C++ (Complete)
   - Tree-sitter integration completed
+- ✅ Rust (Complete)
+  - Frontend structure implemented
+  - Cargo integration completed
+  - AST to IR conversion completed
+  - Ownership system analysis implemented
+  - Comprehensive test suite added
 
 ### Planned Support
 
 Phase 1:
 
-- 📅 Rust
 - 📅 Java
 
 Phase 2:
@@ -49,10 +54,10 @@ Phase 3:
 
 ### Static Analysis
 
-- Control Flow Analysis
-- Data Flow Analysis
+- ✅ Control Flow Analysis
+- ✅ Data Flow Analysis
+- ✅ Type Inference
 - Pointer Analysis
-- Type Inference
 - Abstract Interpretation
 - Program Slicing
 - Dependency Analysis
