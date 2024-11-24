@@ -8,7 +8,7 @@ from tree_sitter import Language, Parser
 from .grammars import get_language, create_parser
 # Initialize the tree-sitter C++ language
 
-class CPPFrontend(Frontend):
+class CppFrontend(Frontend):
     """Frontend for C/C++ code analysis using tree-sitter."""
 
     def __init__(self):

@@ -6,13 +6,13 @@ from pathlib import Path
 import pytest
 
 from lapa.frontend import LanguageFeature, ParsingError
-from lapa.frontends.cpp import CPPFrontend
+from lapa.frontends.cpp import CppFrontend
 from lapa.ir import IR
 
 
 def test_cpp_frontend_features():
     """Test C/C++ frontend features."""
-    frontend = CPPFrontend()
+    frontend = CppFrontend()
     features = frontend._get_language_features()
     
     assert LanguageFeature.FUNCTIONS in features
@@ -48,7 +48,7 @@ def test_cpp_frontend_features():
 
 def test_cpp_frontend_file_extensions():
     """Test C/C++ frontend file extensions."""
-    frontend = CPPFrontend()
+    frontend = CppFrontend()
     extensions = frontend.get_file_extensions()
     
     # C extensions
@@ -73,7 +73,7 @@ def test_cpp_frontend_file_extensions():
 
 def test_parse_nonexistent_file():
     """Test handling of nonexistent files."""
-    frontend = CPPFrontend()
+    frontend = CppFrontend()
     ir = IR()
     
     with pytest.raises(FileNotFoundError):
@@ -83,7 +83,7 @@ def test_parse_nonexistent_file():
 @pytest.mark.skip("C/C++ parsing not yet fully implemented")
 def test_parse_simple_function():
     """Test parsing simple function."""
-    frontend = CPPFrontend()
+    frontend = CppFrontend()
     ir = IR()
     
     code = """
