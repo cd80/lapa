@@ -59,7 +59,6 @@
   - [x] **Java Support**
 
     - [x] Frontend structure
-    - [ ] JDK integration
     - [x] AST to IR conversion
     - [ ] Bytecode analysis
 
@@ -68,7 +67,7 @@
 - [ ] **Enhance Static Analysis**
 
   - [ ] Control Flow Analysis Improvements
-  - [ ] Data Flow Analysis Enhancements
+  - [x] Data Flow Analysis Enhancements
   - [ ] Type Inference Improvements
   - [ ] Dependency Analysis Extensions
   - [ ] IR Optimization Enhancements
@@ -151,4 +150,4 @@
 - [ ] **Enterprise Features**
 - [ ] **Cloud Integration**
 
-_Note: Removed sections related to LLVM, Swift, Kotlin, Objective-C, Erlang, and Perl support. Adjusted the roadmap to focus on program analysis enhancements and future development plans._
+_Note: Adjusted the roadmap to reflect the completion of data flow analysis enhancements and focus on further program analysis developments._

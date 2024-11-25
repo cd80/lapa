@@ -1,7 +1,7 @@
 """
 Data Flow Analysis module.
 
-This module provides functionality to perform data flow analysis on the IR.
+This module provides functionality to perform data flow analysis on the IR, including reaching definitions, live variable analysis, and constant propagation.
 """
 
 from typing import Dict, Set, Tuple, List, Optional, Any
@@ -12,7 +12,7 @@ Definition = Tuple[str, IRNode]  # (variable name, assignment node)
 
 
 class DataFlowAnalyzer:
-    """Performs data flow analysis on the IR, including reaching definitions and live variable analysis."""
+    """Performs data flow analysis on the IR, including reaching definitions, live variable analysis, and constant propagation."""
 
     def __init__(self):
         """Initialize the data flow analyzer."""
@@ -21,6 +21,7 @@ class DataFlowAnalyzer:
         self.phi_nodes: Dict[str, Dict[str, List[IRNode]]] = {}
         self.array_defs: Dict[str, Dict[str, Set[Definition]]] = {}
         self.interprocedural_defs: Dict[str, Dict[str, Set[Definition]]] = {}
+        self.constant_values: Dict[str, Dict[str, Any]] = {}
 
     def analyze(self, ir: IR, cfgs: Dict[str, ControlFlowGraph]) -> None:
         """
@@ -37,6 +38,7 @@ class DataFlowAnalyzer:
         for function_name, cfg in cfgs.items():
             self._analyze_reaching_definitions(function_name, cfg)
             self._analyze_live_variables(function_name, cfg)
+            self._analyze_constant_propagation(function_name, cfg)
             self._analyze_array_accesses(function_name, cfg)
             self._insert_phi_nodes(function_name, cfg)
 
@@ -142,6 +144,51 @@ class DataFlowAnalyzer:
             'in_sets': in_sets,
             'out_sets': out_sets,
         }
+
+    def _analyze_constant_propagation(self, function_name: str, cfg: ControlFlowGraph) -> None:
+        """Perform constant propagation on a single function's CFG."""
+        in_sets: Dict[str, Dict[str, Any]] = {}
+        out_sets: Dict[str, Dict[str, Any]] = {}
+        gen_sets: Dict[str, Dict[str, Any]] = {}
+        kill_sets: Dict[str, Set[str]] = {}
+
+        # Initialize gen and kill sets for each block
+        for block_name, block in cfg.blocks.items():
+            gen_sets[block_name], kill_sets[block_name] = self._compute_const_gen_kill_sets(block)
+
+        # Initialize in and out sets
+        for block_name in cfg.blocks.keys():
+            in_sets[block_name] = {}
+            out_sets[block_name] = {}
+
+        changed = True
+        while changed:
+            changed = False
+            for block_name, block in cfg.blocks.items():
+                # Compute in[B] as the intersection of out sets of predecessors
+                if not block.predecessors:
+                    in_b = {}
+                else:
+                    preds = [out_sets[pred.name] for pred in block.predecessors]
+                    in_b = self._intersect_consts(preds)
+
+                # Compute out[B] = gen[B] ∪ (in[B] - kill[B])
+                old_out = out_sets[block_name]
+                out_b = gen_sets[block_name].copy()
+                for var, value in in_b.items():
+                    if var not in kill_sets[block_name]:
+                        out_b[var] = value
+
+                if out_b != old_out:
+                    out_sets[block_name] = out_b
+                    changed = True
+                in_sets[block_name] = in_b
+
+        # Store the constant values for the function
+        self.constant_values[function_name] = out_sets
+
+        # Propagate constants in the CFG
+        self._propagate_constants(cfg, out_sets)
 
     def _analyze_array_accesses(self, function_name: str, cfg: ControlFlowGraph) -> None:
         """Analyze array and collection access patterns."""
@@ -281,7 +328,7 @@ class DataFlowAnalyzer:
         if node is None:
             return vars_found
         if node.node_type == IRNodeType.VARIABLE:
-            var_name = node.attributes.get('name')
+            var_name = node.attributes.get('name') or node.name
             if var_name:
                 vars_found.add(var_name)
         elif node.node_type in {IRNodeType.BINARY_OP, IRNodeType.UNARY_OP}:
@@ -383,7 +430,7 @@ class DataFlowAnalyzer:
         if node.node_type == IRNodeType.ARRAY_ACCESS:
             array = node.attributes.get('array')
             if isinstance(array, IRNode) and array.node_type == IRNodeType.VARIABLE:
-                return array.attributes.get('name')
+                return array.attributes.get('name') or array.name
             else:
                 return self._get_array_name(array)
         elif node.node_type == IRNodeType.ASSIGNMENT:
@@ -420,3 +467,168 @@ class DataFlowAnalyzer:
         rd = self.reaching_definitions.get(function_name, {})
         out_sets = rd.get('out_sets', {})
         return {d for d in out_sets.get(block_name, set()) if d[0] == var}
+
+    def _compute_const_gen_kill_sets(self, block: BasicBlock) -> Tuple[Dict[str, Any], Set[str]]:
+        """Compute the gen and kill sets for constant propagation analysis."""
+        gen_set: Dict[str, Any] = {}
+        kill_set: Set[str] = set()
+        for node in block.statements:
+            if node.node_type == IRNodeType.ASSIGNMENT:
+                var_name = node.attributes.get('target')
+                value_node = node.attributes.get('value')
+                constant_value = self._evaluate_constant(value_node)
+                if var_name:
+                    if constant_value is not None:
+                        gen_set[var_name] = constant_value
+                    else:
+                        # If value is not constant, we kill any previous constants
+                        kill_set.add(var_name)
+            elif node.node_type == IRNodeType.PHI:
+                var_name = node.attributes.get('target')
+                if var_name:
+                    # Phi nodes are considered to kill constants
+                    kill_set.add(var_name)
+        return gen_set, kill_set
+
+    def _evaluate_constant(self, node: IRNode) -> Optional[Any]:
+        """Evaluate if a node represents a constant value."""
+        if node.node_type == IRNodeType.LITERAL:
+            return node.attributes.get('value')
+        elif node.node_type == IRNodeType.UNARY_OP:
+            operand = node.attributes.get('operand')
+            value = self._evaluate_constant(operand)
+            operator = node.attributes.get('operator')
+            if value is not None:
+                try:
+                    return self._apply_unary_operator(operator, value)
+                except Exception:
+                    return None
+        elif node.node_type == IRNodeType.BINARY_OP:
+            left = node.attributes.get('left_operand')
+            right = node.attributes.get('right_operand')
+            left_value = self._evaluate_constant(left)
+            right_value = self._evaluate_constant(right)
+            operator = node.attributes.get('operator')
+            if left_value is not None and right_value is not None:
+                try:
+                    return self._apply_binary_operator(operator, left_value, right_value)
+                except Exception:
+                    return None
+        return None
+
+    def _apply_unary_operator(self, operator: str, operand: Any) -> Any:
+        """Apply a unary operator to a constant operand."""
+        if operator == '+':
+            return +operand
+        elif operator == '-':
+            return -operand
+        elif operator == 'not':
+            return not operand
+        else:
+            raise ValueError(f"Unknown unary operator: {operator}")
+
+    def _apply_binary_operator(self, operator: str, left: Any, right: Any) -> Any:
+        """Apply a binary operator to constant operands."""
+        if operator == '+':
+            return left + right
+        elif operator == '-':
+            return left - right
+        elif operator == '*':
+            return left * right
+        elif operator == '/':
+            return left / right
+        elif operator == '%':
+            return left % right
+        elif operator == '**':
+            return left ** right
+        elif operator == 'and':
+            return left and right
+        elif operator == 'or':
+            return left or right
+        elif operator == '==':
+            return left == right
+        elif operator == '!=':
+            return left != right
+        elif operator == '<':
+            return left < right
+        elif operator == '>':
+            return left > right
+        elif operator == '<=':
+            return left <= right
+        elif operator == '>=':
+            return left >= right
+        else:
+            raise ValueError(f"Unknown binary operator: {operator}")
+
+    def _intersect_consts(self, const_dicts: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Intersect multiple constant dictionaries."""
+        if not const_dicts:
+            return {}
+        common_vars = set(const_dicts[0].keys())
+        for consts in const_dicts[1:]:
+            common_vars.intersection_update(consts.keys())
+        intersected_consts = {}
+        for var in common_vars:
+            values = {consts[var] for consts in const_dicts if var in consts}
+            if len(values) == 1:
+                intersected_consts[var] = values.pop()
+        return intersected_consts
+
+    def _propagate_constants(self, cfg: ControlFlowGraph, out_sets: Dict[str, Dict[str, Any]]) -> None:
+        """Propagate constants throughout the CFG."""
+        for block_name, block in cfg.blocks.items():
+            consts = out_sets[block_name]
+            new_statements = []
+            for node in block.statements:
+                new_node = self._replace_constants(node, consts)
+                new_statements.append(new_node)
+            block.statements = new_statements
+
+    def _replace_constants(self, node: IRNode, consts: Dict[str, Any]) -> IRNode:
+        """Recursively replace variables with constants in the node."""
+        if node.node_type == IRNodeType.VARIABLE:
+            var_name = node.attributes.get('name') or node.name
+            if var_name in consts:
+                # Replace variable with constant literal
+                return IRNode(
+                    node_type=IRNodeType.LITERAL,
+                    attributes={'value': consts[var_name]},
+                )
+        elif node.node_type in {IRNodeType.BINARY_OP, IRNodeType.UNARY_OP}:
+            # Recursively replace in operands
+            if 'left_operand' in node.attributes:
+                node.attributes['left_operand'] = self._replace_constants(node.attributes['left_operand'], consts)
+            if 'right_operand' in node.attributes:
+                node.attributes['right_operand'] = self._replace_constants(node.attributes['right_operand'], consts)
+            if 'operand' in node.attributes:
+                node.attributes['operand'] = self._replace_constants(node.attributes['operand'], consts)
+        elif node.node_type == IRNodeType.ASSIGNMENT:
+            # Replace in value
+            value = node.attributes.get('value')
+            if isinstance(value, IRNode):
+                node.attributes['value'] = self._replace_constants(value, consts)
+        elif node.node_type == IRNodeType.FUNCTION_CALL:
+            # Replace in arguments
+            args = node.attributes.get('arguments', [])
+            new_args = []
+            for arg in args:
+                if isinstance(arg, IRNode):
+                    new_args.append(self._replace_constants(arg, consts))
+                else:
+                    new_args.append(arg)
+            node.attributes['arguments'] = new_args
+        elif node.node_type == IRNodeType.ARRAY_ACCESS:
+            # Replace in array and index
+            array = node.attributes.get('array')
+            index = node.attributes.get('index')
+            if isinstance(array, IRNode):
+                node.attributes['array'] = self._replace_constants(array, consts)
+            if isinstance(index, IRNode):
+                node.attributes['index'] = self._replace_constants(index, consts)
+        # Process child nodes
+        new_children = []
+        for child in node.children:
+            new_child = self._replace_constants(child, consts)
+            new_children.append(new_child)
+        node.children = new_children
+        return node
